@@ -1,0 +1,19 @@
+<div class="main-layout">
+  <app-sidebar
+    [collapsed]="sidebarCollapsed"
+    (collapsedChange)="onSidebarToggle($event)"
+    (logout)="onLogout()"
+  ></app-sidebar>
+
+  <div class="content-layout">
+    <section class="header">
+      <app-header [pageTitle]="pageTitle"></app-header>
+    </section>
+
+    <section class="dynamic-content container-fluid">
+      <div class="scroll-container">
+        <router-outlet></router-outlet>
+      </div>
+    </section>
+  </div>
+</div>

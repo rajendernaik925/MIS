@@ -1,0 +1,51 @@
+// .overlay {
+//   position: fixed;
+//   top: 1%;
+//   right: 1%;
+//   width: 35%;
+//   height: auto;
+//   z-index: 999;
+//   animation: slideInFromRight 400ms ease-out forwards;
+// }
+
+// @keyframes slideInFromRight {
+//   0% {
+//     transform: translateX(120%);
+//     opacity: 0;
+//   }
+//   70% {
+//     transform: translateX(-5%);
+//     opacity: 1;
+//   }
+//   100% {
+//     transform: translateX(0);
+//     opacity: 1;
+//   }
+// }
+
+.overlay {
+  position: fixed;
+  top: 1%;
+  right: 1%;
+  height: auto;
+  z-index: 999;
+  min-width: 200px;
+  max-width: 50%;
+  transition: width 0.3s ease;
+  animation: slideInFromRight 400ms ease-out forwards;
+}
+
+@keyframes slideInFromRight {
+  0% {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  70% {
+    transform: translateX(-5%);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

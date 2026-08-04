@@ -1,0 +1,31 @@
+<header class="header">
+  <h2 class="header__title">{{ pageTitle }}</h2>
+
+  <div class="header__actions">
+    <div class="header__badge">
+      <i class="fa-regular fa-calendar header__badge-icon"></i>
+      <select
+        class="header__badge-select"
+        [(ngModel)]="selectedPayPeriod"
+        (change)="onPayPeriodChange()"
+        aria-label="Pay period"
+      >
+        <option *ngFor="let period of payPeriods" [value]="period.value">
+          Pay Period {{ period.value }}
+        </option>
+      </select>
+    </div>
+
+    <select
+      class="header__filter"
+      [(ngModel)]="selectedLocation"
+      (change)="onLocationChange()"
+      aria-label="Group filter"
+    >
+      <option value="ALL">All Groups</option>
+      <option value="HYD">Hyderabad (HYD)</option>
+      <option value="MUM">Mumbai (MUM)</option>
+      <option value="CON">Consultants / Contractors</option>
+    </select>
+  </div>
+</header>

@@ -1,0 +1,67 @@
+// base-layout.scss
+// NOTE: html/body reset is global (page-level) — if your project already
+// has this in styles.scss, drop it from here to avoid double-defining it.
+html,
+body {
+  height: 100vh;
+  margin: 0;
+  font-family: plus-jakarta-sans, sans-serif;
+  background: #f2f2f2;
+}
+
+// Row layout: <app-sidebar> (full viewport height) sits on the left,
+// everything else (header + routed content) stacks in a column to its
+// right. This is what makes the sidebar span top-to-bottom while the
+// header only spans from the end of the sidebar to the right edge.
+.main-layout {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  overflow: hidden;
+}
+
+// Right-hand column: header on top, routed content below.
+.content-layout {
+  flex: 1;
+  min-width: 0; // allow children to shrink/scroll instead of overflowing
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+section.header {
+  width: 100%;
+  height: 64px; // Desktop — compact single-row bar
+  flex-shrink: 0;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  section.header {
+    height: 56px;
+  }
+}
+
+section.dynamic-content {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  margin-top: 16px;
+  padding: 0 16px 16px;
+}
+
+.scroll-container {
+  height: 100%;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: auto; // enable horizontal scroll
+  -webkit-overflow-scrolling: touch;
+
+  /* Hide scrollbar */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  scrollbar-width: none;
+}

@@ -1,0 +1,48 @@
+<aside class="sidebar" [class.sidebar--collapsed]="collapsed">
+  <div>
+    <div class="sidebar__brand">
+      <div class="sidebar__brand-info">
+        <div class="sidebar__brand-icon">
+          <i class="fa-solid fa-chart-pie"></i>
+        </div>
+        <span class="sidebar__brand-name sidebar-text">HHC MIS &amp; HR</span>
+      </div>
+      <button class="sidebar__toggle" type="button" (click)="toggleSidebar()">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+
+    <nav class="sidebar__nav">
+      <a
+        *ngFor="let item of navItems"
+        class="sidebar__nav-link"
+        [routerLink]="item.route"
+        routerLinkActive="sidebar__nav-link--active"
+      >
+        <i class="{{ item.icon }} sidebar__nav-icon"></i>
+        <span class="sidebar-text sidebar__nav-label">{{ item.label }}</span>
+        <span *ngIf="item.badge" class="sidebar__badge sidebar-text">{{ item.badge }}</span>
+      </a>
+    </nav>
+  </div>
+
+  <div class="sidebar__footer">
+    <button
+      class="sidebar__logout"
+      type="button"
+      title="Logout"
+      (click)="onLogout()"
+    >
+      <i class="fa-solid fa-right-from-bracket sidebar__nav-icon"></i>
+      <span class="sidebar-text sidebar__nav-label">Logout</span>
+    </button>
+
+    <div class="sidebar__profile">
+      <div class="sidebar__profile-avatar">MIS</div>
+      <div class="sidebar-text sidebar__profile-info">
+        <p class="sidebar__profile-name">Corporate MIS</p>
+        <p class="sidebar__profile-sub">HYD + MUM + Consultants</p>
+      </div>
+    </div>
+  </div>
+</aside>
