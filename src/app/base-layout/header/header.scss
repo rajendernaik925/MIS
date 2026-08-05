@@ -5,14 +5,46 @@
 }
 
 .header {
+  // Mobile/tablet default — see the >=992px override below for desktop.
   height: 100%;
+  min-height: 64px;
   width: 100%;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  gap: 10px;
+  row-gap: 8px;
+  padding: 10px 20px;
   background: #ffffff;
   border-bottom: 1px solid #e2e8f0; // slate-200
+
+  &__title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  &__menu-btn {
+    display: none; // desktop: no hamburger, sidebar is always visible
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    border: none;
+    background: #f1f5f9; // slate-100
+    color: #334155; // slate-700
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+
+    &:hover {
+      background: #e2e8f0; // slate-200
+    }
+  }
 
   &__title {
     margin: 0;
@@ -20,12 +52,18 @@
     font-weight: 700;
     color: #1e293b; // slate-800
     letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
   }
 
   &__actions {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 10px;
+    flex: 0 1 auto;
   }
 
   &__badge {
@@ -42,7 +80,7 @@
     transition: border-color 0.15s ease;
 
     &:hover {
-      border-color: #6366f1; // indigo-500
+      border-color: #0ab86d; // brand green
     }
   }
 
@@ -80,22 +118,64 @@
     transition: border-color 0.15s ease;
 
     &:hover {
-      border-color: #6366f1; // indigo-500
+      border-color: #0ab86d; // brand green
     }
   }
 }
 
-/* Mobile */
+/* Desktop: header takes 68% of its parent's height instead of the full
+   100% used on mobile/tablet. (Sidebar stays a static column at this
+   breakpoint — see sidebar.scss / header__menu-btn below.) */
+@media (min-width: 992px) {
+  .header {
+    height: 68%;
+  }
+}
+
+/* Tablet / mobile: reveal hamburger since the sidebar becomes an
+   off-canvas drawer at this breakpoint (see base-layout / sidebar). */
+@media (max-width: 991.98px) {
+  .header__menu-btn {
+    display: inline-flex;
+  }
+}
+
+/* Mobile: keep BOTH selects visible (Pay Period + Group) — wrap them onto
+   their own row under the title instead of hiding either control. */
 @media (max-width: 768px) {
   .header {
-    padding: 0 12px;
+    padding: 10px 12px;
 
     &__title {
-      font-size: 14px;
+      font-size: 14.5px;
     }
 
-    &__badge {
-      display: none; // hide the pay-period pill on small screens
+    &__actions {
+      flex: 1 1 100%;
+      justify-content: flex-start;
+    }
+
+    &__badge,
+    &__filter {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    &__filter {
+      max-width: none;
+    }
+  }
+}
+
+@media (max-width: 380px) {
+  .header {
+    &__title {
+      max-width: 100%;
+    }
+
+    &__badge,
+    &__filter {
+      font-size: 11px;
     }
   }
 }

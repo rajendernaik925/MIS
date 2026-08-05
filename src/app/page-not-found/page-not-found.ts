@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Location } from '@angular/common';
 
 @Component({
@@ -7,13 +7,9 @@ import { Location } from '@angular/common';
   templateUrl: './page-not-found.html',
   styleUrl: './page-not-found.scss',
 })
-export class PageNotFound implements OnInit {
+export class PageNotFound {
 
   private location: Location = inject(Location);
-
-  ngOnInit(): void {
-    console.log("Locartion Data : ", Location)
-  }
 
   back() {
     this.location.back();

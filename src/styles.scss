@@ -4,84 +4,15 @@ body {
   margin: 0;
   font-family: plus-jakarta-sans, sans-serif;
   background: #f2f2f2;
-  // overflow: hidden; // Prevent body scroll
 }
 
-.main-layout {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
-
-section.header {
-  width: 100%;
-  height: 95px; // Desktop
-  flex-shrink: 0;
-}
-
-/* Mobile */
-@media (max-width: 768px) {
-  section.header {
-    height: 50px;
-  }
-}
-
-.content-layout {
-  flex: 1;
-  display: flex;
-  overflow: hidden;
-}
-
-section.dynamic-content {
-  flex: 1;
-  position: relative;
-  overflow: hidden;
-  margin-top: 20px;
-  padding: 0;
-}
-
-.scroll-container {
-  height: 100%;
-  width: 100%;
-  overflow-y: auto;
-  overflow-x: auto; // enable horizontal scroll
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Hide scrollbar */
-.scroll-container::-webkit-scrollbar {
-  display: none;
-}
-
-.scroll-container {
-  scrollbar-width: none;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// NOTE: layout rules (.main-layout, section.header, .content-layout,
+// section.dynamic-content, .scroll-container) used to be duplicated here
+// AND in base-layout.scss with different, stale values — that's a real
+// footgun since this file is unscoped/global and can fight the
+// component's own styles depending on load order. They've been removed
+// from here; base-layout.scss is now the single source of truth for
+// that layout. Only true, app-wide utility classes live below.
 
 .margin-left {
   margin-left: 0px !important;
@@ -92,26 +23,26 @@ section.dynamic-content {
 }
 
 .custom-bg {
-  background-color: #0AB86D !important;
+  background-color: #0ab86d !important;
 }
 
 .custom-btn {
-  background-color: #0AB86D !important;
+  background-color: #0ab86d !important;
   color: #fff !important;
-  border-color: #0AB86D !important;
+  border-color: #0ab86d !important;
 
   &:hover,
   &:focus,
   &:active {
-    background-color: #0AB86D !important;
+    background-color: #0ab86d !important;
     color: #fff !important;
-    border-color: #0AB86D !important;
+    border-color: #0ab86d !important;
     box-shadow: none !important; // optional (removes bootstrap outline)
   }
 }
 
 .custom-tooltip {
-  --bs-tooltip-bg: #0AB86D;
+  --bs-tooltip-bg: #0ab86d;
   --bs-tooltip-color: #fff;
   --bs-tooltip-border-radius: 0.375rem;
   /* Adjust border radius as needed */
@@ -122,7 +53,7 @@ section.dynamic-content {
 }
 
 .custom-text {
-  color: #0AB86D;
+  color: #0ab86d;
 }
 
 .g-3,
@@ -134,6 +65,7 @@ section.dynamic-content {
 .gx-4 {
   --bs-gutter-x: 1.5rem;
 }
+
 .swal2-card-custom {
   border-radius: 16px !important;
   padding: 0.8rem 0.4rem 0.6rem !important;
@@ -182,5 +114,3 @@ section.dynamic-content {
 .swal2-btn-cancel:hover {
   background: #e2e8f0 !important;
 }
-
-

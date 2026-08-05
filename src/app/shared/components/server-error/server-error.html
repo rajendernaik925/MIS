@@ -1,1 +1,36 @@
-<p>server-error works!</p>
+<section class="server-error-page">
+  <div class="error-grid"></div>
+
+  <div class="error-card">
+    <div class="error-hero">
+      <div class="status-chip">
+        <span class="status-dot"></span>
+        Internal Server Error 
+      </div>
+
+      <div class="error-code-wrap">
+        <span class="error-code">500</span>
+        <span class="error-code-shadow">500</span>
+      </div>
+    </div>
+
+    <h1 class="error-title">We hit an unexpected server issue</h1>
+
+    <p class="error-message">
+      The request could not be completed right now. Please try again in a moment.
+      If the issue continues, contact support with this code:
+      <strong>ERR-500</strong>.
+    </p>
+
+    <div class="action-row">
+      <button type="button" class="btn-primary-action" (click)="retry()">
+        <i class="bi bi-arrow-clockwise"></i>
+        Try Again
+      </button>
+      <button type="button" class="btn-secondary-action" (click)="goHome()">
+        <i class="bi bi-house-door"></i>
+        Go Home
+      </button>
+    </div>
+  </div>
+</section>

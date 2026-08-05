@@ -8,7 +8,6 @@ export const authGuard: CanActivateChildFn = (_route, state): boolean | UrlTree 
 
   const accessToken = storage.get<string>('accessToken');
   const expiryTime = storage.get<number>('expiryTime');
-  console.log("expiry time : ", expiryTime);
 
   const now = Math.floor(Date.now() / 1000);
 

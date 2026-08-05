@@ -1,8 +1,29 @@
 // sidebar.scss
+//
+// Palette: deep slate + brand green accent (ties into the app's existing
+// brand colour used across styles.scss: .custom-bg / .custom-btn / swal
+// confirm button = #0AB86D). Swap the tokens below to re-theme.
 :host {
+  --sb-bg: #0f172a;              // slate-900 (main panel)
+  --sb-bg-soft: rgba(30, 41, 59, 0.55);   // slate-800/55 (brand row / footer)
+  --sb-border: rgba(51, 65, 85, 0.6);     // slate-700/60
+  --sb-text: #94a3b8;            // slate-400 (default nav text)
+  --sb-text-strong: #ffffff;
+  --sb-hover-bg: #1e293b;        // slate-800
+  --sb-accent: #0ab86d;          // brand green
+  --sb-accent-strong: #16a34a;   // brand green, deeper
+  --sb-accent-contrast: #06281c; // dark text on top of accent fills
+  --sb-active-bg: rgba(10, 184, 109, 0.16);
+  --sb-danger: #f87171;          // red-400 (logout hover)
+  --sb-danger-bg: rgba(220, 38, 38, 0.15);
+
   display: block;
   flex-shrink: 0;
   height: 100%;
+}
+
+.sidebar-backdrop {
+  display: none;
 }
 
 .sidebar {
@@ -12,10 +33,10 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background: #1e1b4b; // indigo-950
-  color: #c7d2fe; // indigo-200
+  background: var(--sb-bg);
+  color: var(--sb-text);
   z-index: 30;
-  transition: width 0.3s ease;
+  transition: width 0.3s ease, transform 0.3s ease;
   overflow: hidden;
 
   &--collapsed {
@@ -70,8 +91,8 @@
     justify-content: space-between;
     gap: 8px;
     padding: 0 16px;
-    background: rgba(49, 46, 129, 0.5); // indigo-900/50
-    border-bottom: 1px solid rgba(55, 48, 163, 0.5); // indigo-800/50
+    background: var(--sb-bg-soft);
+    border-bottom: 1px solid var(--sb-border);
     transition: all 0.3s ease;
   }
 
@@ -89,30 +110,37 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #fbbf24; // amber-400
-    color: #1e1b4b; // indigo-950
+    background: var(--sb-accent);
+    color: var(--sb-accent-contrast);
     font-weight: 700;
     border-radius: 8px;
   }
 
   &__brand-name {
     font-weight: 700;
-    color: #fff;
+    color: var(--sb-text-strong);
     letter-spacing: 0.02em;
     font-size: 14px;
     white-space: nowrap;
   }
 
-  &__toggle {
+  &__toggle,
+  &__close-mobile {
     background: none;
     border: none;
-    color: #a5b4fc; // indigo-300
+    color: var(--sb-text);
     cursor: pointer;
     padding: 4px;
+    flex-shrink: 0;
 
     &:hover {
-      color: #fff;
+      color: var(--sb-text-strong);
     }
+  }
+
+  // Close (X) button is mobile-only; hidden on desktop by default.
+  &__close-mobile {
+    display: none;
   }
 
   // ---- Nav ----
@@ -130,21 +158,23 @@
     gap: 12px;
     padding: 12px;
     border-radius: 8px;
-    color: #a5b4fc; // indigo-300
+    color: var(--sb-text);
     font-weight: 500;
     font-size: 14px;
     text-decoration: none;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    border-left: 3px solid transparent;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
     white-space: nowrap;
 
     &:hover {
-      background: #312e81; // indigo-900
-      color: #fff;
+      background: var(--sb-hover-bg);
+      color: var(--sb-text-strong);
     }
 
     &--active {
-      background: #3730a3; // indigo-800
-      color: #fff;
+      background: var(--sb-active-bg);
+      color: var(--sb-text-strong);
+      border-left-color: var(--sb-accent);
     }
   }
 
@@ -174,8 +204,8 @@
   &__footer {
     display: flex;
     flex-direction: column;
-    border-top: 1px solid rgba(49, 46, 129, 0.6); // indigo-900/60
-    background: rgba(49, 46, 129, 0.2); // indigo-900/20
+    border-top: 1px solid var(--sb-border);
+    background: rgba(15, 23, 42, 0.4);
   }
 
   &__logout {
@@ -185,7 +215,7 @@
     padding: 12px 16px;
     background: none;
     border: none;
-    color: #a5b4fc; // indigo-300
+    color: var(--sb-text);
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
@@ -193,8 +223,8 @@
     transition: background-color 0.15s ease, color 0.15s ease;
 
     &:hover {
-      background: rgba(220, 38, 38, 0.15); // subtle red-600 wash
-      color: #fca5a5; // red-300
+      background: var(--sb-danger-bg);
+      color: var(--sb-danger);
     }
   }
 
@@ -203,7 +233,7 @@
     align-items: center;
     gap: 12px;
     padding: 16px;
-    border-top: 1px solid rgba(49, 46, 129, 0.6); // indigo-900/60
+    border-top: 1px solid var(--sb-border);
   }
 
   &__profile-avatar {
@@ -211,13 +241,13 @@
     height: 36px;
     flex-shrink: 0;
     border-radius: 50%;
-    background: #fbbf24; // amber-400
+    background: var(--sb-accent);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
     font-size: 14px;
-    color: #1e1b4b; // indigo-950
+    color: var(--sb-accent-contrast);
   }
 
   &__profile-info {
@@ -228,14 +258,117 @@
     margin: 0;
     font-size: 12px;
     font-weight: 600;
-    color: #fff;
+    color: var(--sb-text-strong);
     white-space: nowrap;
   }
 
   &__profile-sub {
     margin: 0;
     font-size: 10px;
-    color: #818cf8; // indigo-400
+    color: var(--sb-text);
     white-space: nowrap;
+  }
+}
+
+/* ============================= RESPONSIVE =============================
+ * <= 991.98px: sidebar becomes a fixed off-canvas drawer instead of a
+ * static column. It's hidden (translated off-screen) by default and
+ * slides in when `.sidebar--mobile-open` is applied. The desktop collapse
+ * behaviour is ignored here — the drawer always shows full labels.
+ * ======================================================================= */
+@media (max-width: 991.98px) {
+  :host {
+    // Take the sidebar out of the flex row's flow so content-layout can
+    // use the full viewport width; the drawer itself is position: fixed.
+    display: contents;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 272px;
+    max-width: 82vw;
+    height: 100dvh;
+    transform: translateX(-100%);
+    box-shadow: 12px 0 32px rgba(2, 6, 23, 0.35);
+
+    &--collapsed {
+      // A collapsed icon-rail makes no sense as a touch drawer — always
+      // render full width with labels visible while it's open.
+      width: 272px;
+
+      .sidebar-text {
+        display: inline;
+      }
+
+      .sidebar__brand {
+        flex-direction: row;
+        justify-content: space-between;
+        height: 64px;
+        padding: 0 16px;
+      }
+
+      .sidebar__nav {
+        padding: 0 12px;
+      }
+
+      .sidebar__nav-link {
+        justify-content: flex-start;
+        padding: 12px;
+      }
+
+      .sidebar__badge {
+        display: inline-block;
+      }
+
+      .sidebar__footer {
+        align-items: stretch;
+      }
+
+      .sidebar__logout {
+        justify-content: flex-start;
+        padding: 12px 16px;
+        width: auto;
+      }
+
+      .sidebar__profile {
+        justify-content: flex-start;
+        padding: 16px;
+      }
+    }
+
+    &--mobile-open {
+      transform: translateX(0);
+    }
+  }
+
+  .sidebar__toggle {
+    display: none;
+  }
+
+  .sidebar__close-mobile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.55);
+    z-index: 25; // sits just below the drawer (z-index: 30)
+    animation: sidebar-fade-in 0.2s ease;
+  }
+}
+
+@keyframes sidebar-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }

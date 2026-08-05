@@ -1,5 +1,15 @@
 <header class="header">
-  <h2 class="header__title">{{ pageTitle }}</h2>
+  <div class="header__title-row">
+    <button
+      class="header__menu-btn"
+      type="button"
+      aria-label="Open menu"
+      (click)="menuToggle.emit()"
+    >
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <h2 class="header__title">{{ pageTitle }}</h2>
+  </div>
 
   <div class="header__actions">
     <div class="header__badge">

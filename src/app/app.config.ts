@@ -16,7 +16,12 @@ import {
   ApplicationConfig,
 } from '@angular/core';
 import { provideRouter, Router } from '@angular/router';
-import { provideHttpClient, withInterceptors, HttpErrorResponse } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withInterceptors,
+  withFetch,
+  HttpErrorResponse,
+} from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 import { routes } from './app.routes';
@@ -70,7 +75,8 @@ export const appConfig: ApplicationConfig = {
       withInterceptors([
         loaderInterceptor,
         readOnlyInterceptor,
-      ])
+      ]),
+      withFetch()
     ),
 
     {

@@ -32,22 +32,15 @@ body {
 
 section.header {
   width: 100%;
-  height: 64px; // Desktop — compact single-row bar
+  min-height: 64px; // Desktop — compact single-row bar
   flex-shrink: 0;
-}
-
-/* Mobile */
-@media (max-width: 768px) {
-  section.header {
-    height: 56px;
-  }
 }
 
 section.dynamic-content {
   flex: 1;
   position: relative;
   overflow: hidden;
-  margin-top: 16px;
+  margin-top: 8px;
   padding: 0 16px 16px;
 }
 
@@ -64,4 +57,39 @@ section.dynamic-content {
   }
 
   scrollbar-width: none;
+}
+
+/* ============================= RESPONSIVE =============================
+ * At <= 991.98px the sidebar (see sidebar.scss) switches to a fixed
+ * off-canvas drawer, so the content column simply takes the full width
+ * here — no extra layout math needed on this side.
+ * ======================================================================= */
+@media (max-width: 991.98px) {
+  .main-layout {
+    height: 100dvh;
+  }
+
+  .content-layout {
+    height: 100dvh;
+  }
+
+  section.header {
+    // Header wraps onto two rows on narrow screens (hamburger + title,
+    // then the Pay Period / Group selects) — let it grow instead of
+    // clipping content with a fixed height.
+    height: auto;
+    min-height: 56px;
+  }
+
+  section.dynamic-content {
+    margin-top: 18px;
+    padding: 0 12px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  section.dynamic-content {
+    margin-top: 12px;
+    padding: 0 8px 8px;
+  }
 }

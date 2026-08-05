@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -21,6 +21,9 @@ export class Header implements OnInit, OnDestroy {
 
   /** Set by BaseLayout (or a route resolver) per page. */
   @Input() pageTitle = 'Executive Overview';
+
+  /** Emitted when the mobile hamburger button is tapped (opens the sidebar drawer). */
+  @Output() menuToggle = new EventEmitter<void>();
 
   selectedLocation = this.filterState.current.location;
   selectedPayPeriod = this.filterState.current.payPeriod;

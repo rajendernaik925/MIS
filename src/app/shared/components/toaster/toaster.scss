@@ -35,6 +35,17 @@
   animation: slideInFromRight 400ms ease-out forwards;
 }
 
+/* On small screens a percentage-based max-width gets too cramped for
+   longer messages — let the toast use most of the viewport instead. */
+@media (max-width: 575.98px) {
+  .overlay {
+    left: 3%;
+    right: 3%;
+    width: auto !important;
+    max-width: 94%;
+  }
+}
+
 @keyframes slideInFromRight {
   0% {
     transform: translateX(120%);

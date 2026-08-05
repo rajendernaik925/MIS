@@ -12,6 +12,26 @@ export const Routes: Route[] = [
         loadChildren: () => import('./dashboard/dashboard.routes').then(m => m.Routes),
       },
       {
+        path: 'payable-summary',
+        loadChildren: () => import('./paybale-summary/payable-summary.routes').then(m => m.Routes),
+      },
+      {
+        path: 'location-bifurcation',
+        loadChildren: () => import('./location-bifurcation/location-bifurcation.routes').then(m => m.Routes),
+      },
+      {
+        path: 'joins-exits',
+        loadChildren: () => import('./join&exit/join.routes').then(m => m.Routes),
+      },
+      {
+        path: 'interns',
+        loadChildren: () => import('./interns&contractors/intern.routes').then(m => m.Routes),
+      },
+      {
+        path: 'methodology',
+        loadChildren: () => import('./methodology/methodology.routes').then(m => m.Routes),
+      },
+      {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full',

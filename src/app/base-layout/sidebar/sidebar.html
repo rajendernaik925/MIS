@@ -1,4 +1,11 @@
-<aside class="sidebar" [class.sidebar--collapsed]="collapsed">
+<!-- Backdrop only exists/shows for the mobile off-canvas drawer -->
+<div class="sidebar-backdrop" *ngIf="mobileOpen" (click)="closeMobile()"></div>
+
+<aside
+  class="sidebar"
+  [class.sidebar--collapsed]="collapsed"
+  [class.sidebar--mobile-open]="mobileOpen"
+>
   <div>
     <div class="sidebar__brand">
       <div class="sidebar__brand-info">
@@ -7,8 +14,25 @@
         </div>
         <span class="sidebar__brand-name sidebar-text">HHC MIS &amp; HR</span>
       </div>
-      <button class="sidebar__toggle" type="button" (click)="toggleSidebar()">
+
+      <!-- Desktop: collapse to icon rail -->
+      <button
+        class="sidebar__toggle"
+        type="button"
+        title="Collapse menu"
+        (click)="toggleSidebar()"
+      >
         <i class="fa-solid fa-bars"></i>
+      </button>
+
+      <!-- Mobile: close the off-canvas drawer -->
+      <button
+        class="sidebar__close-mobile"
+        type="button"
+        title="Close menu"
+        (click)="closeMobile()"
+      >
+        <i class="fa-solid fa-xmark"></i>
       </button>
     </div>
 
@@ -18,6 +42,7 @@
         class="sidebar__nav-link"
         [routerLink]="item.route"
         routerLinkActive="sidebar__nav-link--active"
+        (click)="onNavClick()"
       >
         <i class="{{ item.icon }} sidebar__nav-icon"></i>
         <span class="sidebar-text sidebar__nav-label">{{ item.label }}</span>

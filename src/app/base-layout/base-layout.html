@@ -1,13 +1,15 @@
 <div class="main-layout">
   <app-sidebar
     [collapsed]="sidebarCollapsed"
+    [mobileOpen]="mobileSidebarOpen"
     (collapsedChange)="onSidebarToggle($event)"
+    (mobileOpenChange)="onMobileSidebarToggle($event)"
     (logout)="onLogout()"
   ></app-sidebar>
 
   <div class="content-layout">
     <section class="header">
-      <app-header [pageTitle]="pageTitle"></app-header>
+      <app-header [pageTitle]="pageTitle" (menuToggle)="openMobileSidebar()"></app-header>
     </section>
 
     <section class="dynamic-content container-fluid">

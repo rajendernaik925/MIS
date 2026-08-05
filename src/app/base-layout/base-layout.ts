@@ -15,10 +15,22 @@ export class BaseLayout {
   // title without hardcoding it here.
   pageTitle = 'Executive Overview';
 
+  /** Desktop: icon-only collapsed rail. */
   sidebarCollapsed = false;
+
+  /** Mobile: off-canvas drawer open/closed. */
+  mobileSidebarOpen = false;
 
   onSidebarToggle(collapsed: boolean): void {
     this.sidebarCollapsed = collapsed;
+  }
+
+  onMobileSidebarToggle(open: boolean): void {
+    this.mobileSidebarOpen = open;
+  }
+
+  openMobileSidebar(): void {
+    this.mobileSidebarOpen = true;
   }
 
   onLogout(): void {
