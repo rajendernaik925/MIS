@@ -6,7 +6,7 @@ export const Routes: Route[] = [
         loadComponent: () => import('./join-list/join-list').then(c => c.JoinList)
     },
     {
-        path: 'details/:module/:id',
+        path: 'manage/:module/:id',
         loadComponent: () => import('./join-manage/join-manage').then(c => c.JoinManage)
     },
     {

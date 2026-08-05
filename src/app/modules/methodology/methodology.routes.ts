@@ -6,7 +6,7 @@ export const Routes: Route[] = [
         loadComponent: () => import('./methodology-list/methodology-list').then(c => c.MethodologyList)
     },
     {
-        path: 'details/:module/:id',
+        path: 'manage/:module/:id',
         loadComponent: () => import('./methodology-manage/methodology-manage').then(c => c.MethodologyManage)
     },
     {

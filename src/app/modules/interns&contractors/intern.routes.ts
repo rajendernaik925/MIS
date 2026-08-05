@@ -6,7 +6,7 @@ export const Routes: Route[] = [
         loadComponent: () => import('./intern-list/intern-list').then(c => c.InternList)
     },
     {
-        path: 'details/:module/:id',
+        path: 'manage/:module/:id',
         loadComponent: () => import('./intern-manage/intern-manage').then(c => c.InternManage)
     },
     {
