@@ -3,7 +3,12 @@
 //   apiUrl: 'http://192.168.214.112:1000',
 // };
 
+// export const environment = {
+//   production: true,
+//   apiUrl: 'https://vendorapp.heterohealthcare.com/IndentManagement',
+// }; 
+
 export const environment = {
   production: true,
-  apiUrl: 'https://vendorapp.heterohealthcare.com/IndentManagement',
+  apiUrl: 'https://indentapi.utkarshconnect.com/IndentManagement',
 }; 

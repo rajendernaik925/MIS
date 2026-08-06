@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
+import { InProgress } from "../../supprt-components/in-progress/in-progress";
 
 @Component({
   selector: 'app-join-list',
-  imports: [],
+  imports: [InProgress],
   templateUrl: './join-list.html',
   styleUrl: './join-list.scss',
 })

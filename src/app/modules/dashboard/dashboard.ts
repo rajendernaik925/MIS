@@ -1,5 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { FilterStateService } from '../../base-layout/core/filter-state.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { distinctUntilChanged } from 'rxjs/operators';
+import { OpenaiService } from '../openai';
+import { HttpErrorResponse } from '@angular/common/http';
 
 interface StatCard {
   label: string;
@@ -38,7 +43,48 @@ interface BarChartConfig {
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
-export class Dashboard {
+export class Dashboard implements OnInit {
+
+  private filterState = inject(FilterStateService);
+   private destroyRef = inject(DestroyRef);
+   private OpenaiService = inject(OpenaiService);
+
+   ngOnInit(): void {
+    this.filterState.filters.pipe(
+      distinctUntilChanged((prev, curr) =>
+        prev.payPeriod === curr.payPeriod && prev.location === curr.location
+      ),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe((filters) => {
+      this.loadDashboardData(filters);
+    });
+
+    this.TextInformation();
+  }
+
+  private loadDashboardData(filters: { payPeriod: string; location: string }): void {
+    console.log('Loading dashboard data for:', filters);
+  }
+
+  private TextInformation(): void {
+    const formData = new FormData();
+    formData.append('key', 'value'); // Add any necessary key-value pairs to the FormData
+    this.OpenaiService.textInformation(formData).subscribe({
+      next: (res: any) => {
+        console.log('Text information response:', res);
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error('Error fetching text information:', err);
+      }
+    }
+    );
+  }
+
+
+
+
+
+
   // ---- Group colors (shared across all donuts) ----
   private readonly groupColors = {
     hyderabad: '#312e81',
