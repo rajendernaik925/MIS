@@ -1,0 +1,372 @@
+$warning-bg: #fdf7e3;
+$warning-border: #f0e0a8;
+$warning-text: #8a6d1e;
+$warning-title: #78350f;
+$badge-red: #dc2626;
+
+$joins-green: #059669;
+$exits-red: #dc2626;
+$joins-navy: #312e81;
+$exits-orange: #f59e0b;
+
+$text-dark: #1f2430;
+$text-muted: #6b7280;
+$border-light: #e5e7eb;
+$bg-page: #f3f4f8;
+
+.join-exit-dashboard {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: $bg-page;
+  border-radius: 12px;
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+// Warning banner
+.warning-banner {
+  background: $warning-bg;
+  border: 1px solid $warning-border;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+
+  .warning-title {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+
+    .warning-icon {
+      font-size: 1rem;
+    }
+
+    h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: $warning-title;
+      margin: 0;
+    }
+  }
+
+  .badge-real {
+    background: $badge-red;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    padding: 0.25rem 0.55rem;
+    border-radius: 6px;
+  }
+
+  .warning-text {
+    font-size: 0.88rem;
+    color: $warning-text;
+    margin: 0.6rem 0 0;
+    line-height: 1.5;
+  }
+}
+
+// Stat cards
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.stat-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+
+  .stat-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: $text-muted;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-top: 0.4rem;
+    color: $text-dark;
+
+    &.joins { color: #2563eb; }
+    &.exits { color: $exits-red; }
+    &.net { color: $joins-green; }
+    &.net.negative { color: $exits-red; }
+    &.attrition { color: $text-dark; }
+  }
+}
+
+// Chart layout
+.chart-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  @media (max-width: 950px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.chart-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+
+  h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: $text-dark;
+    margin: 0;
+  }
+}
+
+.badge-sample {
+  background: $badge-red;
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+}
+
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    color: $text-dark;
+  }
+
+  .swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+}
+
+// Colors
+.joins-color { background: $joins-green; }
+.exits-color { background: $exits-red; }
+.joins-color-alt { background: $joins-navy; }
+.exits-color-alt { background: $exits-orange; }
+
+// Vertical bar chart (department)
+.vertical-chart {
+  display: flex;
+  gap: 0.5rem;
+  height: 340px;
+}
+
+.y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-bottom: 46px;
+  font-size: 0.78rem;
+  color: $text-muted;
+  min-width: 26px;
+}
+
+.v-bars-area {
+  position: relative;
+  flex: 1;
+  padding-bottom: 46px;
+}
+
+.gridlines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 46px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.gridline {
+  border-top: 1px solid $border-light;
+  height: 0;
+}
+
+.v-bars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 46px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+}
+
+.v-bar-group {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  position: relative;
+}
+
+.v-bar-pair {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 100%;
+  width: 100%;
+  justify-content: center;
+}
+
+.v-bar {
+  width: 16px;
+  border-radius: 2px 2px 0 0;
+  min-height: 2px;
+  transition: height 0.3s ease;
+}
+
+.v-bar-label {
+  position: absolute;
+  bottom: -46px;
+  font-size: 0.75rem;
+  color: $text-dark;
+  white-space: nowrap;
+  transform: rotate(-25deg);
+  transform-origin: top left;
+  left: 50%;
+}
+
+// Horizontal bar chart (designation)
+.horizontal-chart {
+  display: flex;
+  flex-direction: column;
+}
+
+.h-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.h-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.h-row-label {
+  width: 130px;
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  color: $text-dark;
+  text-align: right;
+}
+
+.h-bars {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.h-bar-track {
+  height: 12px;
+  background: transparent;
+  position: relative;
+}
+
+.h-bar {
+  height: 100%;
+  border-radius: 2px;
+  min-width: 2px;
+  transition: width 0.3s ease;
+}
+
+.x-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+  margin-left: 146px;
+  border-top: 1px solid $border-light;
+  padding-top: 0.5rem;
+
+  span {
+    font-size: 0.78rem;
+    color: $text-muted;
+  }
+}
+
+// Fields required table
+.fields-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+
+  h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: $text-dark;
+    margin: 0 0 1rem;
+  }
+}
+
+.fields-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.fields-row {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 1rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid $border-light;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  @media (max-width: 700px) {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+}
+
+.field-name {
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: $text-dark;
+}
+
+.field-description {
+  font-size: 0.88rem;
+  color: $text-muted;
+}

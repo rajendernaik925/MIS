@@ -1,1 +1,111 @@
-<app-in-progress></app-in-progress>
+<div class="location-dashboard">
+
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <div class="summary-card hyderabad">
+      <h3>{{ summaries[0].label }}</h3>
+      <div class="big-number">{{ formatCompact(summaries[0].manpower) }}</div>
+      <p class="sub-line">
+        {{ summaries[0].manpowerPct }}% of total manpower · ₹{{ summaries[0].netPayableCr }} Cr net payable
+      </p>
+    </div>
+
+    <div class="summary-card mumbai">
+      <h3>{{ summaries[1].label }}</h3>
+      <div class="big-number">{{ formatCompact(summaries[1].manpower) }}</div>
+      <p class="sub-line">
+        {{ summaries[1].manpowerPct }}% of total manpower · ₹{{ summaries[1].netPayableCr }} Cr net payable
+      </p>
+    </div>
+
+    <div class="summary-card consultants">
+      <h3>{{ summaries[2].label }}</h3>
+      <div class="big-number">{{ formatCompact(summaries[2].manpower) }}</div>
+      <p class="sub-line">
+        {{ summaries[2].manpowerPct }}% of total manpower · ₹{{ summaries[2].netPayableCr }} Cr net payable
+      </p>
+    </div>
+  </div>
+
+  <!-- Manpower Share / Net Payable Share -->
+  <div class="chart-row">
+
+    <div class="chart-card">
+      <h4>Manpower Share</h4>
+      <div class="bar-chart">
+        <div class="y-axis">
+          <span *ngFor="let tick of getYAxisTicks(manpowerChart)">{{ formatCompact(tick) }}</span>
+        </div>
+        <div class="bars-area">
+          <div class="gridlines">
+            <div class="gridline" *ngFor="let tick of getYAxisTicks(manpowerChart)"></div>
+          </div>
+          <div class="bars">
+            <div class="bar-wrapper" *ngFor="let bar of manpowerChart">
+              <div
+                class="bar"
+                [ngClass]="bar.colorClass"
+                [style.height.%]="getBarHeightPctAgainstAxis(bar, getYAxisTicks(manpowerChart))">
+              </div>
+              <span class="bar-label">{{ bar.label }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h4>Net Payable Share</h4>
+      <div class="bar-chart">
+        <div class="y-axis">
+          <span *ngFor="let tick of getYAxisTicks(netPayableChart)">{{ formatCompact(tick) }}</span>
+        </div>
+        <div class="bars-area">
+          <div class="gridlines">
+            <div class="gridline" *ngFor="let tick of getYAxisTicks(netPayableChart)"></div>
+          </div>
+          <div class="bars">
+            <div class="bar-wrapper" *ngFor="let bar of netPayableChart">
+              <div
+                class="bar"
+                [ngClass]="bar.colorClass"
+                [style.height.%]="getBarHeightPctAgainstAxis(bar, getYAxisTicks(netPayableChart))">
+              </div>
+              <span class="bar-label">{{ bar.label }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Avg Cost per Head -->
+  <div class="chart-card full-width">
+    <h4>Avg. Cost per Head, by Group</h4>
+    <p class="chart-subtitle">
+      Net Payable ÷ Manpower — a rising contractor line here is the earliest budget-creep signal
+    </p>
+    <div class="bar-chart">
+      <div class="y-axis">
+        <span *ngFor="let tick of getYAxisTicks(avgCostPerHeadChart)">{{ formatCompact(tick) }}</span>
+      </div>
+      <div class="bars-area">
+        <div class="gridlines">
+          <div class="gridline" *ngFor="let tick of getYAxisTicks(avgCostPerHeadChart)"></div>
+        </div>
+        <div class="bars">
+          <div class="bar-wrapper" *ngFor="let bar of avgCostPerHeadChart">
+            <div
+              class="bar"
+              [ngClass]="bar.colorClass"
+              [style.height.%]="getBarHeightPctAgainstAxis(bar, getYAxisTicks(avgCostPerHeadChart))">
+            </div>
+            <span class="bar-label">{{ bar.label }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

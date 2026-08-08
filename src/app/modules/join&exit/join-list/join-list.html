@@ -1,1 +1,132 @@
-<app-in-progress></app-in-progress>
+<div class="join-exit-dashboard">
+
+  <!-- Warning banner -->
+  <div class="warning-banner">
+    <div class="warning-title">
+      <span class="warning-icon">⚠️</span>
+      <h3>Illustrative sample data</h3>
+      <span class="badge-real">NOT YOUR REAL RECORDS</span>
+    </div>
+    <p class="warning-text">
+      Your payable sheet has month-end totals per business unit, not individual employee records —
+      so there's no join/exit date, department or designation to chart yet. This page is fully
+      wired; swap in a real feed (fields below) and it goes live with no rebuild.
+    </p>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="stat-cards">
+    <div class="stat-card">
+      <span class="stat-label">JOINS (SAMPLE MONTH)</span>
+      <div class="stat-value joins">{{ joinsThisMonth }}</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">EXITS (SAMPLE MONTH)</span>
+      <div class="stat-value exits">{{ exitsThisMonth }}</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">NET HEADCOUNT CHANGE</span>
+      <div class="stat-value net" [class.negative]="netHeadcountChange < 0">
+        {{ netHeadcountChange >= 0 ? '+' : '' }}{{ netHeadcountChange }}
+      </div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">ATTRITION RATE (ILLUSTRATIVE)</span>
+      <div class="stat-value attrition">{{ attritionRate }}%</div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="chart-row">
+
+    <!-- Department vertical bar chart -->
+    <div class="chart-card">
+      <div class="chart-title-row">
+        <h4>Joins vs Exits by Department</h4>
+        <span class="badge-sample">SAMPLE</span>
+      </div>
+
+      <div class="legend">
+        <span class="legend-item"><i class="swatch joins-color"></i> Joins</span>
+        <span class="legend-item"><i class="swatch exits-color"></i> Exits</span>
+      </div>
+
+      <div class="vertical-chart">
+        <div class="y-axis">
+          <span *ngFor="let tick of departmentYAxisTicks">{{ tick }}</span>
+        </div>
+        <div class="v-bars-area">
+          <div class="gridlines">
+            <div class="gridline" *ngFor="let tick of departmentYAxisTicks"></div>
+          </div>
+          <div class="v-bars">
+            <div class="v-bar-group" *ngFor="let dept of departmentBars">
+              <div class="v-bar-pair">
+                <div
+                  class="v-bar joins-color"
+                  [style.height.%]="getVerticalBarHeightPct(dept.joins, departmentYAxisTicks)">
+                </div>
+                <div
+                  class="v-bar exits-color"
+                  [style.height.%]="getVerticalBarHeightPct(dept.exits, departmentYAxisTicks)">
+                </div>
+              </div>
+              <span class="v-bar-label">{{ dept.label }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Designation horizontal bar chart -->
+    <div class="chart-card">
+      <div class="chart-title-row">
+        <h4>Joins vs Exits by Designation</h4>
+        <span class="badge-sample">SAMPLE</span>
+      </div>
+
+      <div class="legend">
+        <span class="legend-item"><i class="swatch joins-color-alt"></i> Joins</span>
+        <span class="legend-item"><i class="swatch exits-color-alt"></i> Exits</span>
+      </div>
+
+      <div class="horizontal-chart">
+        <div class="h-rows">
+          <div class="h-row" *ngFor="let d of designationBars">
+            <span class="h-row-label">{{ d.label }}</span>
+            <div class="h-bars">
+              <div class="h-bar-track">
+                <div
+                  class="h-bar joins-color-alt"
+                  [style.width.%]="getHorizontalBarWidthPct(d.joins, designationXAxisTicks)">
+                </div>
+              </div>
+              <div class="h-bar-track">
+                <div
+                  class="h-bar exits-color-alt"
+                  [style.width.%]="getHorizontalBarWidthPct(d.exits, designationXAxisTicks)">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="x-axis">
+          <span *ngFor="let tick of designationXAxisTicks">{{ tick }}</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Fields required table -->
+  <div class="fields-card">
+    <h4>Fields required to make this page live</h4>
+    <div class="fields-table">
+      <div class="fields-row" *ngFor="let field of requiredFields">
+        <span class="field-name">{{ field.name }}</span>
+        <span class="field-description">{{ field.description }}</span>
+      </div>
+    </div>
+  </div>
+
+</div>

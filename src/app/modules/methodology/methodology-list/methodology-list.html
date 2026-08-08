@@ -1,1 +1,100 @@
-<app-in-progress></app-in-progress>
+<div class="methodology-page">
+
+  <!-- Section 1 -->
+  <section class="methodology-section">
+    <h2>1. What's live vs. template in this build</h2>
+    <hr class="section-divider" />
+
+    <p class="section-line">
+      <span class="badge live-badge">LIVE</span>
+      Overview, Payable Summary and Location Bifurcation — every number is computed directly from
+      <code class="file-chip">{{ sourceFileName }}</code>
+      plus the real Consultants table under Interns &amp; Contractors.
+    </p>
+
+    <p class="section-line">
+      <span class="badge sample-badge">SAMPLE</span>
+      Join &amp; Exit, and the Interns portion of Interns &amp; Contractors — illustrative numbers
+      only, because the source sheet has no employee-level join/exit/intern records. Both pages
+      list the exact fields needed to go live.
+    </p>
+  </section>
+
+  <!-- Section 2 -->
+  <section class="methodology-section">
+    <h2>2. Recommended data model</h2>
+    <hr class="section-divider" />
+
+    <p>
+      Keep the Payable Summary as-is for Finance, but add a second
+      <strong>employee-level monthly export</strong>: Employee ID, Business Unit (matching Payable
+      Summary naming exactly), Department, Designation, Employment Type (Permanent / Contractor /
+      Intern), Date of Joining, Date of Leaving, Exit Reason. That single file unlocks Join/Exit,
+      Interns and designation-level cuts all at once — and can be aggregated to cross-check the
+      existing summary sheet.
+    </p>
+  </section>
+
+  <!-- Section 3 -->
+  <section class="methodology-section">
+    <h2>3. This build vs. the earlier Gemini mockup — what changed</h2>
+    <hr class="section-divider" />
+
+    <ul class="bullet-list">
+      <li>
+        Every KPI, chart and table under Overview / Payable Summary / Bifurcation now uses your
+        actual uploaded numbers — the Gemini version's headcounts and ₹ figures were illustrative
+        placeholders, not derived from your file.
+      </li>
+      <li>
+        Kept the Gemini app-shell UX: collapsible sidebar, top filter bar, CSV export, quick-filter
+        badges — genuinely nice interaction patterns.
+      </li>
+      <li>
+        Replaced the fake 3-month period dropdown with an honest single-period badge — we only have
+        one month of data; a selector implying 3 months would mislead.
+      </li>
+      <li>
+        Split "Contractors" correctly: your source data treats Consultants as its own group (not a
+        sub-slice of HYD/MUM headcount), so the location filter is HYD / MUM / Consultants, and the
+        real Consultants table now lives under Interns &amp; Contractors.
+      </li>
+      <li>
+        Every sample-data section is badge-labeled
+        <span class="badge sample-badge inline">SAMPLE</span>
+        so nobody mistakes a mockup number for a real one — the Gemini version didn't distinguish
+        real vs illustrative data anywhere.
+      </li>
+      <li>
+        Business-unit level detail (45 rows, sortable, searchable, exportable) replaces Gemini's
+        6-row mock monthly table — the actual granularity Finance/HR will want to drill into.
+      </li>
+    </ul>
+  </section>
+
+  <!-- Section 4 -->
+  <section class="methodology-section">
+    <h2>4. Known data caveat</h2>
+    <hr class="section-divider" />
+
+    <p>
+      Consultant rows don't split Total Net Payable into Actual Gross and Deductions — so those two
+      KPIs are Hyderabad + Mumbai only everywhere on this dashboard (manpower, net payable and CTC
+      all include consultants). Add that split at source if Finance needs a true all-in
+      gross/deductions figure.
+    </p>
+  </section>
+
+  <!-- Section 5 -->
+  <section class="methodology-section">
+    <h2>5. Suggested rollout</h2>
+    <hr class="section-divider" />
+
+    <ol class="rollout-list">
+      <li *ngFor="let step of rolloutSteps">
+        <strong>{{ step.label }}</strong> {{ step.description }}
+      </li>
+    </ol>
+  </section>
+
+</div>

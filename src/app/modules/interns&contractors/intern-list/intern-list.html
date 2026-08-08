@@ -1,1 +1,143 @@
-<app-in-progress></app-in-progress>
+<div class="contractors-interns">
+
+  <!-- Contractors / Consultants -->
+  <div class="section-card">
+    <div class="section-header">
+      <h2>Contractors / Consultants</h2>
+      <span class="live-badge">LIVE DATA</span>
+    </div>
+    <p class="section-subtitle">
+      This is the real Consultants group from your payable sheet — {{ totalDivisions }} divisions,
+      {{ totalManpower }} manpower, {{ formatRupee(totalNetPayable) }} net payable this pay period.
+    </p>
+
+    <table class="consultants-table">
+      <thead>
+        <tr>
+          <th>DIVISION</th>
+          <th class="num">MANPOWER</th>
+          <th class="num">NET PAYABLE</th>
+          <th class="num">CTC P/M</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of consultantDivisions">
+          <td class="division-name">{{ row.division }}</td>
+          <td class="num">{{ row.manpower }}</td>
+          <td class="num net-payable">{{ formatRupee(row.netPayable) }}</td>
+          <td class="num">{{ formatRupee(row.ctcPerMonth) }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Interns warning banner -->
+  <div class="warning-banner">
+    <div class="warning-title">
+      <span class="warning-icon">⚠️</span>
+      <h3>Interns section uses illustrative sample data</h3>
+      <span class="badge-red">NOT REAL</span>
+    </div>
+    <p class="warning-text">
+      The payable sheet has no separate "Intern" category — tag intern rows with an Employment Type
+      of "Intern" at source to make this section live.
+    </p>
+  </div>
+
+  <!-- Intern stat cards -->
+  <div class="stat-cards">
+    <div class="stat-card">
+      <span class="stat-label">TOTAL INTERNS</span>
+      <div class="stat-value total">{{ totalInterns }}</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">MONTHLY STIPEND BUDGET</span>
+      <div class="stat-value budget">{{ formatRupee(monthlyStipendBudget) }}</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">AVG. STIPEND / INTERN</span>
+      <div class="stat-value avg">{{ formatRupee(avgStipendPerIntern) }}</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">% OF GRAND CTC</span>
+      <div class="stat-value pct">~{{ pctOfGrandCtc }}%</div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="chart-row">
+
+    <!-- Donut chart -->
+    <div class="chart-card">
+      <div class="chart-title-row">
+        <h4>Interns by Department</h4>
+        <span class="badge-red">SAMPLE</span>
+      </div>
+
+      <div class="donut-wrapper">
+        <div class="donut" [style.background]="donutGradient"></div>
+      </div>
+
+      <div class="donut-legend">
+        <span class="legend-item" *ngFor="let dept of internDepartments">
+          <i class="swatch" [style.background]="dept.color"></i>
+          {{ dept.department }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Horizontal bar chart -->
+    <div class="chart-card">
+      <div class="chart-title-row">
+        <h4>Stipend Budget by Department</h4>
+        <span class="badge-red">SAMPLE</span>
+      </div>
+
+      <div class="horizontal-chart">
+        <div class="h-rows">
+          <div class="h-row" *ngFor="let dept of internDepartments">
+            <span class="h-row-label">{{ dept.department }}</span>
+            <div class="h-bar-track">
+              <div
+                class="h-bar"
+                [style.width.%]="getBudgetBarWidthPct(dept.deptBudget, budgetXAxisTicks)">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="x-axis">
+          <span *ngFor="let tick of budgetXAxisTicks">{{ formatIndianNumber(tick) }}</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Department detail table -->
+  <div class="section-card">
+    <div class="chart-title-row">
+      <h4>Department detail</h4>
+      <span class="badge-red">SAMPLE</span>
+    </div>
+
+    <table class="detail-table">
+      <thead>
+        <tr>
+          <th>DEPARTMENT</th>
+          <th class="num">INTERNS</th>
+          <th class="num">AVG. STIPEND</th>
+          <th class="num">DEPT. BUDGET</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let dept of internDepartments">
+          <td>{{ dept.department }}</td>
+          <td class="num">{{ dept.interns }}</td>
+          <td class="num">{{ formatRupee(dept.avgStipend) }}</td>
+          <td class="num bold">{{ formatRupee(dept.deptBudget) }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

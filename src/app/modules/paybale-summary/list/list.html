@@ -1,1 +1,115 @@
-<app-in-progress></app-in-progress>
+<div class="payable-summary">
+
+  <!-- Header -->
+  <div class="summary-header">
+    <div class="header-text">
+      <div class="title-row">
+        <h1>Consolidated Monthly Payable Summary</h1>
+        <span class="live-badge">LIVE DATA</span>
+      </div>
+      <p class="subtitle">
+        All {{ totalBusinessUnits }} business units — Hyderabad, Mumbai and Consultants —
+        for Pay Period {{ payPeriod }}. Click a column header to sort.
+      </p>
+    </div>
+    <button class="download-btn" (click)="downloadCsv()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="12" y1="18" x2="12" y2="12"></line>
+        <polyline points="9 15 12 18 15 15"></polyline>
+      </svg>
+      Download Filtered Rows (CSV)
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <span class="filter-label">QUICK GROUP FILTER:</span>
+      <button
+        class="filter-pill"
+        [class.active]="groupFilter === 'ALL'"
+        (click)="setGroupFilter('ALL')">
+        All Groups
+      </button>
+      <button
+        class="filter-pill"
+        [class.active]="groupFilter === 'HYD'"
+        (click)="setGroupFilter('HYD')">
+        Hyderabad
+      </button>
+      <button
+        class="filter-pill"
+        [class.active]="groupFilter === 'MUM'"
+        (click)="setGroupFilter('MUM')">
+        Mumbai
+      </button>
+      <button
+        class="filter-pill"
+        [class.active]="groupFilter === 'CON'"
+        (click)="setGroupFilter('CON')">
+        Consultants
+      </button>
+    </div>
+
+    <input
+      type="text"
+      class="search-input"
+      placeholder="Search business unit..."
+      [(ngModel)]="searchTerm"
+    />
+  </div>
+
+  <!-- Table -->
+  <div class="table-card">
+    <div class="table-card-header">
+      <h2>Business Unit Detail</h2>
+      <span class="row-count">Showing {{ filteredRows.length }} of {{ totalBusinessUnits }} business units</span>
+    </div>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th (click)="sortBy('group')">GROUP</th>
+            <th (click)="sortBy('businessUnit')">BUSINESS UNIT</th>
+            <th class="num" (click)="sortBy('manpower')">MANPOWER</th>
+            <th class="num" (click)="sortBy('teda')">TEDA</th>
+            <th class="num" (click)="sortBy('incentive')">INCENTIVE</th>
+            <th class="num" (click)="sortBy('netSalary')">NET SALARY</th>
+            <th class="num" (click)="sortBy('netPayable')">NET PAYABLE</th>
+            <th class="num" (click)="sortBy('actualGross')">ACTUAL GROSS</th>
+            <th class="num" (click)="sortBy('deductions')">DEDUCTIONS</th>
+            <th class="num" (click)="sortBy('ctcPerMonth')">CTC / MONTH</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of filteredRows">
+            <td>
+              <span class="group-badge" [ngClass]="row.group.toLowerCase()">{{ row.group }}</span>
+            </td>
+            <td class="unit-name">{{ row.businessUnit }}</td>
+            <td class="num">{{ formatNumber(row.manpower) }}</td>
+            <td class="num">{{ formatNumber(row.teda) }}</td>
+            <td class="num">{{ formatNumber(row.incentive) }}</td>
+            <td class="num">{{ formatNumber(row.netSalary) }}</td>
+            <td class="num bold">{{ formatNumber(row.netPayable) }}</td>
+            <td class="num">{{ formatNumber(row.actualGross) }}</td>
+            <td class="num">{{ formatNumber(row.deductions) }}</td>
+            <td class="num">{{ formatNumber(row.ctcPerMonth) }}</td>
+          </tr>
+          <tr *ngIf="filteredRows.length === 0">
+            <td colspan="10" class="empty-state">No business units match your filters.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="table-footnote">
+      Note: Consultant rows show "—" for Actual Gross / Deductions — the source sheet does not
+      split these for contractor engagements (Net Payable = CTC for that group).
+    </p>
+  </div>
+
+</div>

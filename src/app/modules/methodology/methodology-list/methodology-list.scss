@@ -1,0 +1,135 @@
+$navy: #2e2a7a;
+$green: #16a34a;
+$badge-red: #dc2626;
+
+$text-dark: #1f2430;
+$text-body: #374151;
+$text-muted: #6b7280;
+$border-light: #e5e7eb;
+$bg-page: #f3f4f8;
+$code-bg: #f3f4f6;
+$code-text: #4b5563;
+
+.methodology-page {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: 100%;        // was max-width: 960px
+  max-width: 100%;
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+.methodology-section {
+  margin-bottom: 2rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: $navy;
+    margin: 0 0 0.75rem;
+  }
+
+  p {
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: $text-body;
+    margin: 0 0 0.9rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.section-divider {
+  border: none;
+  border-top: 1px solid $border-light;
+  margin: 0 0 1.25rem;
+}
+
+.section-line {
+  display: block;
+}
+
+// Badges
+.badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.22rem 0.55rem;
+  border-radius: 5px;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+  position: relative;
+  top: -1px;
+}
+
+.live-badge {
+  background: $green;
+  color: #fff;
+}
+
+.sample-badge {
+  background: $badge-red;
+  color: #fff;
+
+  &.inline {
+    margin: 0 0.35rem;
+  }
+}
+
+// Code / filename chip
+.file-chip {
+  display: inline-block;
+  background: $code-bg;
+  color: $code-text;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.85rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  margin: 0 0.15rem;
+}
+
+// Bullet list
+.bullet-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+
+  li {
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: $text-body;
+  }
+}
+
+// Rollout numbered list
+.rollout-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  counter-reset: rollout-counter;
+
+  li {
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: $text-body;
+
+    strong {
+      color: $text-dark;
+    }
+  }
+}
