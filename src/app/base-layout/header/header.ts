@@ -1,80 +1,100 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, inject } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
 import { FilterStateService } from '../core/filter-state.service';
-
-interface PayPeriodOption {
-  value: string; // "202607"
-  label: string; // "Jul 2026 (202607)"
-}
+import { IEmployeeAccess, IEmployeeData } from '../../core/modals/tokent';
 
 @Component({
   selector: 'app-header',
-  imports: [CommonModule, FormsModule],
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './header.html',
   styleUrl: './header.scss',
 })
-export class Header implements OnInit, OnDestroy {
-  private readonly filterState = inject(FilterStateService);
-  private subscription?: Subscription;
+export class Header implements OnInit {
+  protected readonly filterState = inject(FilterStateService);
+  private readonly elRef = inject(ElementRef<HTMLElement>);
 
-  /** Set by BaseLayout (or a route resolver) per page. */
   @Input() pageTitle = 'Executive Overview';
-
-  /** Emitted when the mobile hamburger button is tapped (opens the sidebar drawer). */
   @Output() menuToggle = new EventEmitter<void>();
 
-  selectedLocation = this.filterState.current.location;
-  selectedPayPeriod = this.filterState.current.payPeriod;
+  readonly payPeriodOpen = signal(false);
+  readonly locationOpen = signal(false);
 
-  readonly payPeriods: PayPeriodOption[] = this.buildPayPeriodOptions();
+  readonly employeeData = signal<IEmployeeData | null>(null);
 
   ngOnInit(): void {
-    // Keep the header in sync if some other part of the app (or a
-    // routed component) updates the filters programmatically.
-    this.subscription = this.filterState.filters.subscribe((filters) => {
-      this.selectedLocation = filters.location;
-      this.selectedPayPeriod = filters.payPeriod;
-    });
+    this.loadEmployeeData();
   }
 
-  ngOnDestroy(): void {
-    this.subscription?.unsubscribe();
-  }
+  private loadEmployeeData(): void {
+    const raw = localStorage.getItem('employeeAccess');
+    if (!raw) return;
 
-  onPayPeriodChange(): void {
-    this.filterState.setPayPeriod(this.selectedPayPeriod);
-  }
-
-  onLocationChange(): void {
-    this.filterState.setLocation(this.selectedLocation);
-  }
-
-  /** Builds the last 6 pay periods (current month back), formatted as YYYYMM. */
-  private buildPayPeriodOptions(): PayPeriodOption[] {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    const now = new Date();
-    const options: PayPeriodOption[] = [];
-
-    for (let i = 0; i < 6; i++) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const value = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}`;
-      options.push({ value, label: `${months[d.getMonth()]} ${d.getFullYear()} (${value})` });
+    try {
+      const parsed: IEmployeeAccess = JSON.parse(raw);
+      if (parsed?.employeeData) {
+        this.employeeData.set(parsed.employeeData);
+      }
+    } catch (err) {
+      console.error('[Header] Failed to parse employeeAccess from localStorage:', err);
     }
+  }
 
-    // Make sure the default selected period is always a valid option,
-    // even if it doesn't fall in the last 6 months.
-    if (!options.some((o) => o.value === this.filterState.current.payPeriod)) {
-      options.unshift({
-        value: this.filterState.current.payPeriod,
-        label: `Pay Period ${this.filterState.current.payPeriod}`,
-      });
+  togglePayPeriod(): void {
+    this.locationOpen.set(false);
+    this.payPeriodOpen.update((v) => !v);
+  }
+
+  toggleLocation(): void {
+    this.payPeriodOpen.set(false);
+    this.locationOpen.update((v) => !v);
+  }
+
+  selectPayPeriod(value: string): void {
+    this.filterState.setPayPeriod(value);
+    this.payPeriodOpen.set(false);
+  }
+
+  selectLocation(value: string): void {
+    this.filterState.setLocation(value);
+    this.locationOpen.set(false);
+  }
+
+  // Close both panels on any click outside this component.
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.elRef.nativeElement.contains(event.target as Node)) {
+      this.payPeriodOpen.set(false);
+      this.locationOpen.set(false);
     }
+  }
 
-    return options;
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.payPeriodOpen.set(false);
+    this.locationOpen.set(false);
+  }
+
+  trackByValue(_: number, item: { value: string }): string {
+    return item.value;
+  }
+
+  payPeriodSelectedLabel(): string {
+    const val = this.filterState.selectedPayPeriod();
+    return this.filterState.payPeriods().find((p) => p.value === val)?.label ?? '';
+  }
+
+  locationSelectedLabel(): string {
+    const val = this.filterState.selectedLocation();
+    return this.filterState.locations().find((l) => l.value === val)?.label ?? '';
+  }
+
+  toTitleCase(value: string): string {
+    return value
+      .toLowerCase()
+      .split(' ')
+      .filter(Boolean)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
   }
 }

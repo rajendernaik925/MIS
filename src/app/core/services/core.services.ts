@@ -1,41 +1,3 @@
-// import { inject, Injectable } from '@angular/core';
-// import { BehaviorSubject } from 'rxjs';
-// import { StorageService } from './storage.service';
-// import { IToastInterface } from '../modals/toast';
-// import { ITokenData } from '../modals/tokent';
-
-// @Injectable({
-//   providedIn: 'root'
-// })
-// export class CoreService {
-
-//   private showToast$: BehaviorSubject<IToastInterface> = new BehaviorSubject({type: '', message: ''});
-//   showToast = this.showToast$.asObservable();
-//   private storageService: StorageService = inject(StorageService);
-
-//   displayToast(data = { type: "", message: "" }) {
-//     this.showToast$.next(data);
-//   }
-
-//   setTokens(data: ITokenData) {
-//     const tokens = {
-//       accessToken: 'null',
-//       refreshToken: 'null',
-//       expiryTime: 'null',
-//     };
-//     if (data?.access) {
-//       tokens.accessToken = data.access;
-//     }
-//     if (data?.refresh) {
-//       tokens.refreshToken = data.refresh;
-//     }
-//     if (data?.expiry_time) {
-//       tokens.expiryTime = `${data.expiry_time}`;
-//     }
-//     this.storageService.setTokens(tokens);
-//   }
-// }
-
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { StorageService } from './storage.service';
@@ -58,7 +20,6 @@ export class CoreService {
     this.showToast$.next(data);
   }
 
-  // Decode JWT payload safely
   private decodeJwt(token: string): any {
     try {
       const payload = token.split('.')[1];
@@ -68,17 +29,13 @@ export class CoreService {
     }
   }
 
-  // Save tokens
-  setTokens(jwtToken: string) {
+  // token: the raw JWT string from `res.token`
+  setTokens(jwtToken: string): void {
     const decoded = this.decodeJwt(jwtToken);
 
-    const tokens = {
-      accessToken: jwtToken,
-      expiryTime: decoded?.exp ? decoded.exp : null,
-    };
-
-    // Save to storage
-    this.storageService.set('accessToken', tokens.accessToken);
-    this.storageService.set('expiryTime', tokens.expiryTime);
+    // decoded.exp is epoch SECONDS — matches what loginGuard/authGuard
+    // compare against (Math.floor(Date.now() / 1000))
+    this.storageService.set('accessToken', jwtToken);
+    this.storageService.set('expiryTime', decoded?.exp ?? null);
   }
 }

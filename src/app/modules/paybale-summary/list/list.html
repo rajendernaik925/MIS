@@ -1,78 +1,60 @@
 <div class="payable-summary">
+  <div class="panel">
 
-  <!-- Header -->
-  <div class="summary-header">
-    <div class="header-text">
-      <div class="title-row">
-        <h1>Consolidated Monthly Payable Summary</h1>
-        <span class="live-badge">LIVE DATA</span>
+    <!-- Header: everything stays on a single line; small button + search -->
+    <div class="panel-header">
+      <div class="panel-header__left">
+        <span class="header-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+            <path d="M3 9h18"></path>
+            <path d="M9 4v16"></path>
+          </svg>
+        </span>
+        <h1>Payable Summary</h1>
+        <span class="count-badge">{{ totalRecords }}</span>
+        <span class="header-subtitle" *ngIf="currentFilters.payPeriod">
+          &middot; Pay Period {{ currentFilters.payPeriod }} &middot; {{ currentFilters.location }}
+        </span>
       </div>
-      <p class="subtitle">
-        All {{ totalBusinessUnits }} business units — Hyderabad, Mumbai and Consultants —
-        for Pay Period {{ payPeriod }}. Click a column header to sort.
-      </p>
-    </div>
-    <button class="download-btn" (click)="downloadCsv()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-        <polyline points="14 2 14 8 20 8"></polyline>
-        <line x1="12" y1="18" x2="12" y2="12"></line>
-        <polyline points="9 15 12 18 15 15"></polyline>
-      </svg>
-      Download Filtered Rows (CSV)
-    </button>
-  </div>
 
-  <!-- Filters -->
-  <div class="filter-bar">
-    <div class="filter-group">
-      <span class="filter-label">QUICK GROUP FILTER:</span>
-      <button
-        class="filter-pill"
-        [class.active]="groupFilter === 'ALL'"
-        (click)="setGroupFilter('ALL')">
-        All Groups
-      </button>
-      <button
-        class="filter-pill"
-        [class.active]="groupFilter === 'HYD'"
-        (click)="setGroupFilter('HYD')">
-        Hyderabad
-      </button>
-      <button
-        class="filter-pill"
-        [class.active]="groupFilter === 'MUM'"
-        (click)="setGroupFilter('MUM')">
-        Mumbai
-      </button>
-      <button
-        class="filter-pill"
-        [class.active]="groupFilter === 'CON'"
-        (click)="setGroupFilter('CON')">
-        Consultants
-      </button>
+      <div class="panel-header__right">
+        <button
+          class="download-btn"
+          type="button"
+          [disabled]="!hasData"
+          [attr.aria-disabled]="!hasData"
+          [title]="hasData ? 'Download rows as Excel/CSV' : 'No data available to download'"
+          (click)="downloadCsv()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="12" y1="18" x2="12" y2="12"></line>
+            <polyline points="9 15 12 18 15 15"></polyline>
+          </svg>
+          Download Excel
+        </button>
+
+        <div class="search-box">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="7"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input
+            type="text"
+            placeholder="Search business unit..."
+            [ngModel]="searchText"
+            (ngModelChange)="onSearchInput($event)" />
+        </div>
+      </div>
     </div>
 
-    <input
-      type="text"
-      class="search-input"
-      placeholder="Search business unit..."
-      [(ngModel)]="searchTerm"
-    />
-  </div>
-
-  <!-- Table -->
-  <div class="table-card">
-    <div class="table-card-header">
-      <h2>Business Unit Detail</h2>
-      <span class="row-count">Showing {{ filteredRows.length }} of {{ totalBusinessUnits }} business units</span>
-    </div>
-
+    <!-- Table: header + GROUP column fixed; only the row data scrolls (both axes) -->
     <div class="table-scroll">
       <table>
         <thead>
           <tr>
-            <th (click)="sortBy('group')">GROUP</th>
+            <th class="sticky-col" (click)="sortBy('group')">GROUP</th>
             <th (click)="sortBy('businessUnit')">BUSINESS UNIT</th>
             <th class="num" (click)="sortBy('manpower')">MANPOWER</th>
             <th class="num" (click)="sortBy('teda')">TEDA</th>
@@ -85,31 +67,60 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let row of filteredRows">
-            <td>
-              <span class="group-badge" [ngClass]="row.group.toLowerCase()">{{ row.group }}</span>
-            </td>
-            <td class="unit-name">{{ row.businessUnit }}</td>
-            <td class="num">{{ formatNumber(row.manpower) }}</td>
-            <td class="num">{{ formatNumber(row.teda) }}</td>
-            <td class="num">{{ formatNumber(row.incentive) }}</td>
-            <td class="num">{{ formatNumber(row.netSalary) }}</td>
-            <td class="num bold">{{ formatNumber(row.netPayable) }}</td>
-            <td class="num">{{ formatNumber(row.actualGross) }}</td>
-            <td class="num">{{ formatNumber(row.deductions) }}</td>
-            <td class="num">{{ formatNumber(row.ctcPerMonth) }}</td>
+          <ng-container *ngIf="!loading && !loadError">
+            <tr *ngFor="let row of sortedRows">
+              <td class="sticky-col">
+                <span class="group-badge" [ngClass]="row.group.toLowerCase()">{{ row.group }}</span>
+              </td>
+              <td class="unit-name">{{ row.businessUnit }}</td>
+              <td class="num">{{ formatNumber(row.manpower) }}</td>
+              <td class="num">{{ formatNumber(row.teda) }}</td>
+              <td class="num">{{ formatNumber(row.incentive) }}</td>
+              <td class="num">{{ formatNumber(row.netSalary) }}</td>
+              <td class="num bold">{{ formatNumber(row.netPayable) }}</td>
+              <td class="num">{{ formatNumber(row.actualGross) }}</td>
+              <td class="num">{{ formatNumber(row.deductions) }}</td>
+              <td class="num">{{ formatNumber(row.ctcPerMonth) }}</td>
+            </tr>
+            <tr *ngIf="sortedRows.length === 0">
+              <td colspan="10" class="empty-state">No business units to display.</td>
+            </tr>
+          </ng-container>
+
+          <tr *ngIf="loading">
+            <td colspan="10" class="empty-state">Loading payable summary…</td>
           </tr>
-          <tr *ngIf="filteredRows.length === 0">
-            <td colspan="10" class="empty-state">No business units match your filters.</td>
+
+          <tr *ngIf="loadError">
+            <td colspan="10" class="empty-state">
+              Couldn't load the payable summary. Please try again.
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <p class="table-footnote">
-      Note: Consultant rows show "—" for Actual Gross / Deductions — the source sheet does not
-      split these for contractor engagements (Net Payable = CTC for that group).
-    </p>
+    <!-- Pagination — stays put at the bottom of the panel; only rows above scroll -->
+    @if (totalRecords > 0) {
+      <div class="pagination">
+        <span class="pagination__info">
+          Showing <strong>{{ startIndex }}</strong>–<strong>{{ endIndex }}</strong>
+          of <strong>{{ totalRecords }}</strong> records
+        </span>
+        <div class="pagination__controls">
+          <button class="pagination__btn" (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+          @for (p of pageNumbers; track p) {
+            <button class="pagination__page" [class.pagination__page--active]="p === currentPage"
+              (click)="changePage(p)">{{ p }}</button>
+          }
+          <button class="pagination__btn" (click)="changePage(currentPage + 1)"
+            [disabled]="currentPage >= totalPages">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    }
   </div>
-
 </div>

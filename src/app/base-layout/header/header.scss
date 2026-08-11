@@ -1,11 +1,9 @@
-// header.scss
 :host {
   display: block;
   height: 100%;
 }
 
 .header {
-  // Mobile/tablet default — see the >=992px override below for desktop.
   height: 100%;
   min-height: 64px;
   width: 100%;
@@ -13,11 +11,12 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
   row-gap: 8px;
-  padding: 10px 20px;
+  padding: 14px 24px;
   background: #ffffff;
-  border-bottom: 1px solid #e2e8f0; // slate-200
+  border-bottom: 1px solid #e2e8f0;
+  position: relative;
 
   &__title-row {
     display: flex;
@@ -28,29 +27,29 @@
   }
 
   &__menu-btn {
-    display: none; // desktop: no hamburger, sidebar is always visible
+    display: none;
     align-items: center;
     justify-content: center;
     width: 34px;
     height: 34px;
     flex-shrink: 0;
     border: none;
-    background: #f1f5f9; // slate-100
-    color: #334155; // slate-700
+    background: #f1f5f9;
+    color: #334155;
     border-radius: 8px;
     cursor: pointer;
     font-size: 15px;
 
     &:hover {
-      background: #e2e8f0; // slate-200
+      background: #e2e8f0;
     }
   }
 
   &__title {
     margin: 0;
-    font-size: 17px;
+    font-size: 18px;
     font-weight: 700;
-    color: #1e293b; // slate-800
+    color: #0f172a;
     letter-spacing: -0.01em;
     white-space: nowrap;
     overflow: hidden;
@@ -65,105 +64,168 @@
     gap: 10px;
     flex: 0 1 auto;
   }
+}
 
-  &__badge {
+.dropdown {
+  position: relative;
+
+  &__trigger {
     display: inline-flex;
     align-items: center;
-    font-size: 11.5px;
-    font-weight: 600;
-    background: #f1f5f9; // slate-100
-    border: 1px solid #e2e8f0; // slate-200
-    border-radius: 6px;
-    padding: 6px 8px 6px 10px;
-    color: #64748b; // slate-500
-    white-space: nowrap;
-    transition: border-color 0.15s ease;
+    height: 30px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 7px;
+    padding: 0 9px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    font: inherit;
 
     &:hover {
-      border-color: #0ab86d; // brand green
+      border-color: #0ab86d;
+    }
+
+    &:focus-visible {
+      outline: none;
+      border-color: #0ab86d;
+      box-shadow: 0 0 0 3px rgba(10, 184, 109, 0.12);
+    }
+
+    &--location {
+      border-color: #0ab86d;
     }
   }
 
-  &__badge-icon {
-    margin-right: 5px;
+  &__icon {
+    margin-right: 6px;
     font-size: 11px;
-    flex-shrink: 0;
+    color: #64748b;
   }
 
-  // The pay-period control looks like the static badge from the mockup,
-  // but is a real <select> so it's editable and drives FilterStateService.
-  &__badge-select {
+  &__label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #334155;
+    white-space: nowrap;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__chevron {
+    margin-left: 8px;
+    font-size: 9px;
+    color: #64748b;
+    transition: transform 0.15s ease;
+
+    &--open {
+      transform: rotate(180deg);
+    }
+  }
+
+  &__panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 180px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15, 23, 42, 0.06);
+    padding: 5px;
+    z-index: 40;
+  }
+
+  &__section-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #94a3b8;
+    padding: 6px 8px 3px;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    width: 100%;
     border: none;
     background: transparent;
+    text-align: left;
     font: inherit;
-    font-weight: 600;
-    color: #64748b; // slate-500
-    cursor: pointer;
-    outline: none;
-    padding: 0;
-    appearance: auto;
-  }
-
-  &__filter {
-    background: #f8fafc; // slate-50
-    border: 1px solid #e2e8f0; // slate-200
-    color: #334155; // slate-700
-    font-size: 11.5px;
-    font-weight: 600;
+    padding: 6px 8px;
     border-radius: 6px;
-    padding: 6px 10px;
-    outline: none;
     cursor: pointer;
-    max-width: 220px;
-    transition: border-color 0.15s ease;
 
     &:hover {
-      border-color: #0ab86d; // brand green
+      background: #f1f5f9;
     }
+
+    &--selected {
+      background: #e6f7ef;
+    }
+  }
+
+  &__item-icon {
+    font-size: 11px;
+    color: #94a3b8;
+    width: 14px;
+    flex-shrink: 0;
+    text-align: center;
+  }
+
+  &__item-label {
+    flex: 1;
+    font-size: 12px;
+    font-weight: 600;
+    color: #334155;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__item--selected &__item-label {
+    color: #0f172a;
+  }
+
+  &__check {
+    font-size: 10px;
+    color: #0ab86d;
+    flex-shrink: 0;
   }
 }
 
-/* Desktop: header takes 68% of its parent's height instead of the full
-   100% used on mobile/tablet. (Sidebar stays a static column at this
-   breakpoint — see sidebar.scss / header__menu-btn below.) */
 @media (min-width: 992px) {
   .header {
     height: 68%;
   }
 }
 
-/* Tablet / mobile: reveal hamburger since the sidebar becomes an
-   off-canvas drawer at this breakpoint (see base-layout / sidebar). */
 @media (max-width: 991.98px) {
   .header__menu-btn {
     display: inline-flex;
   }
 }
 
-/* Mobile: keep BOTH selects visible (Pay Period + Group) — wrap them onto
-   their own row under the title instead of hiding either control. */
 @media (max-width: 768px) {
   .header {
-    padding: 10px 12px;
+    padding: 10px 14px;
 
     &__title {
-      font-size: 14.5px;
+      font-size: 15px;
     }
 
     &__actions {
       flex: 1 1 100%;
       justify-content: flex-start;
     }
+  }
 
-    &__badge,
-    &__filter {
-      flex: 1 1 auto;
-      min-width: 0;
-    }
-
-    &__filter {
-      max-width: none;
-    }
+  .dropdown__panel {
+    right: auto;
+    left: 0;
   }
 }
 
@@ -172,10 +234,68 @@
     &__title {
       max-width: 100%;
     }
+  }
 
-    &__badge,
-    &__filter {
+  .dropdown {
+    &__label {
       font-size: 11px;
+      max-width: 120px;
+    }
+
+    &__item-label {
+      font-size: 11px;
+    }
+  }
+}
+.employee-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  height: 42px;
+  padding: 0 12px 0 6px;
+  background: #f5f4ff;
+  border-radius: 10px;
+
+  &__avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #ffffff;
+    color: #6d5ce8;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  &__meta {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+  }
+
+  &__name {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #1e1b3a;
+    white-space: nowrap;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__id {
+    font-size: 11px;
+    font-weight: 600;
+    color: #6d5ce8;
+  }
+}
+
+@media (max-width: 768px) {
+  .employee-card {
+    &__name {
+      max-width: 100px;
     }
   }
 }

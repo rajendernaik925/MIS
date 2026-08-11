@@ -5,7 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../auth.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CoreService } from '../../core/services/core.services';
-import { IAuthResponse } from '../../core/modals/tokent';
+import { IEmployeeAccess, ILoginResponse } from '../../core/modals/tokent';
 import { SettingsService } from '../../core/services/settings.service';
 import { StorageService } from '../../core/services/storage.service';
 // ⬇️ type-only import — erased at compile time, safe on the server
@@ -84,63 +84,133 @@ export class Login implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
-    if (this.loginForm.valid) {
-      this.storageService.removeTokens();
-      this.authService.Login(this.loginForm.value).subscribe({
-        next: (res: any) => {
-          const tokens: IAuthResponse = {
-            jwtToken: res.jwtToken,
-            employeeAccess: res.employeeAccess
-          };
-          this.coreService.setTokens(tokens.jwtToken);
-          this.settingsService.setEmployeeAccess(tokens.employeeAccess);
-          localStorage.setItem("employeeAccess", JSON.stringify(tokens.employeeAccess));
-          this.router.navigate(['/dashboard']);
-          this.spinnerService.hide();
-        },
+  if (this.loginForm.valid) {
+    this.storageService.removeTokens();
 
-        error: (err: any) => {
+    const payload = {
+      employeeCode: this.loginForm.value.username,
+      password: this.loginForm.value.password
+    };
 
-          if (typeof err === 'string') {
+    this.authService.Login(payload).subscribe({
+      next: (res: ILoginResponse) => {
+        const employeeAccess: IEmployeeAccess = {
+          employeeData: {
+            employeeId: res.employeeId,
+            roleId: res.roleId,
+            roleName: res.roleName,
+            employeeName: res.employeeName,
+            departmentName: res.departmentName,
+            designationName: res.designationName,
+            businessunitName: res.businessunitName,
+          },
+          moduleAccess: res.permissions,
+        };
 
-            this.errorMessage = err;
+        this.coreService.setTokens(res.token);
+        this.settingsService.setEmployeeAccess(employeeAccess);
+        this.storageService.set('employeeAccess', employeeAccess);
+        this.logoutService.startAutoLogout();
 
-          } else if (err?.error?.message) {
+        this.router.navigate(['/dashboard']);
+        this.spinnerService.hide();
+      },
 
-            this.errorMessage = err.error.message;
-
-          } else if (err?.error?.error) {
-
-            this.errorMessage = err.error.error;
-
-          } else if (err?.message) {
-
-            this.errorMessage = err.message;
-
-          } else {
-
-            this.errorMessage = 'Something went wrong. Please try again.';
-          }
-          setTimeout(() => {
-            this.errorMessage = '';
-          }, 2000);
-
-          console.log('Error:', this.errorMessage);
+      error: (err: any) => {
+        if (typeof err === 'string') {
+          this.errorMessage = err;
+        } else if (err?.error?.message) {
+          this.errorMessage = err.error.message;
+        } else if (err?.error?.error) {
+          this.errorMessage = err.error.error;
+        } else if (err?.message) {
+          this.errorMessage = err.message;
+        } else {
+          this.errorMessage = 'Something went wrong. Please try again.';
         }
-      })
-    } else {
-      Object.keys(this.loginForm.controls).forEach((key) => {
-        const control = this.loginForm.get(key);
-        control?.markAsTouched();
-        control?.markAsDirty();
-        control?.updateValueAndValidity();
-      });
-      this.coreService.displayToast({
-        type: "error",
-        message: "Please Enter Valid Credentials"
-      })
-    }
+
+        setTimeout(() => { this.errorMessage = ''; }, 2000);
+        this.spinnerService.hide();
+      }
+    });
+  } else {
+    Object.keys(this.loginForm.controls).forEach((key) => {
+      const control = this.loginForm.get(key);
+      control?.markAsTouched();
+      control?.markAsDirty();
+      control?.updateValueAndValidity();
+    });
+    this.coreService.displayToast({
+      type: 'error',
+      message: 'Please Enter Valid Credentials'
+    });
   }
+}
+
+  // onSubmit(): void {
+  //   if (this.loginForm.valid) {
+  //     this.storageService.removeTokens();
+  //     console.log('Form Submitted:', this.loginForm.value);
+  //     const payload = {
+  //       employeeCode: this.loginForm.value.username,
+  //       password: this.loginForm.value.password
+  //     };
+  //     this.authService.Login(payload).subscribe({
+  //       next: (res: any) => {
+  //         const tokens: IAuthResponse = {
+  //           jwtToken: res.jwtToken,
+  //           employeeAccess: res.employeeAccess
+  //         };
+  //         this.coreService.setTokens(tokens.jwtToken);
+  //         this.settingsService.setEmployeeAccess(tokens.employeeAccess);
+  //         localStorage.setItem("employeeAccess", JSON.stringify(tokens.employeeAccess));
+  //         this.router.navigate(['/dashboard']);
+  //         this.spinnerService.hide();
+          
+  //       },
+
+  //       error: (err: any) => {
+
+  //         if (typeof err === 'string') {
+
+  //           this.errorMessage = err;
+
+  //         } else if (err?.error?.message) {
+
+  //           this.errorMessage = err.error.message;
+
+  //         } else if (err?.error?.error) {
+
+  //           this.errorMessage = err.error.error;
+
+  //         } else if (err?.message) {
+
+  //           this.errorMessage = err.message;
+
+  //         } else {
+
+  //           this.errorMessage = 'Something went wrong. Please try again.';
+  //         }
+  //         setTimeout(() => {
+  //           this.errorMessage = '';
+  //         }, 2000);
+
+  //         console.log('Error:', this.errorMessage);
+  //       }
+  //     })
+  //   } else {
+  //     Object.keys(this.loginForm.controls).forEach((key) => {
+  //       const control = this.loginForm.get(key);
+  //       control?.markAsTouched();
+  //       control?.markAsDirty();
+  //       control?.updateValueAndValidity();
+  //     });
+  //     this.coreService.displayToast({
+  //       type: "error",
+  //       message: "Please Enter Valid Credentials"
+  //     })
+  //   }
+  // }
 
   // ⬇️ now async, and only touches bootstrap's real JS in the browser
   async forgotpwd(): Promise<void> {

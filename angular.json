@@ -69,7 +69,7 @@
           "options": {
             "allowedHosts": [
               "localhost",
-              "192.168.213.129"
+              "192.168.215.241"
             ]
           },
           "configurations": {

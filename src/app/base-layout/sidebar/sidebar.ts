@@ -1,7 +1,6 @@
-import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
-import { StorageService } from '../../core/services/storage.service';
+import { RouterModule } from '@angular/router';
 
 interface NavItem {
   label: string;
@@ -24,8 +23,6 @@ export class Sidebar {
   /** Mobile off-canvas drawer state. */
   @Input() mobileOpen = false;
   @Output() mobileOpenChange = new EventEmitter<boolean>();
-  private storageService: StorageService = inject(StorageService);
-  private router: Router = inject(Router);
 
   @Output() logout = new EventEmitter<void>();
 
@@ -59,10 +56,6 @@ export class Sidebar {
     // here (see styles-global-leftover.scss for the swal2-* theme classes)
     // before emitting — e.g. Swal.fire({...}).then(result => { if
     // (result.isConfirmed) this.logout.emit(); }).
-    // this.logout.emit();
-
-    this.storageService.removeTokens();
-    this.router.navigate(['/auth/login']);
-
+    this.logout.emit();
   }
 }

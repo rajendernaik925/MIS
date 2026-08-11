@@ -46,10 +46,9 @@ interface BarChartConfig {
 export class Dashboard implements OnInit {
 
   private filterState = inject(FilterStateService);
-   private destroyRef = inject(DestroyRef);
-   private OpenaiService = inject(OpenaiService);
+  private destroyRef = inject(DestroyRef);
 
-   ngOnInit(): void {
+  ngOnInit(): void {
     this.filterState.filters.pipe(
       distinctUntilChanged((prev, curr) =>
         prev.payPeriod === curr.payPeriod && prev.location === curr.location
@@ -58,31 +57,25 @@ export class Dashboard implements OnInit {
     ).subscribe((filters) => {
       this.loadDashboardData(filters);
     });
-
-    this.TextInformation();
   }
 
   private loadDashboardData(filters: { payPeriod: string; location: string }): void {
     console.log('Loading dashboard data for:', filters);
   }
 
-  private TextInformation(): void {
-    const formData = new FormData();
-    formData.append('key', 'value'); // Add any necessary key-value pairs to the FormData
-    this.OpenaiService.textInformation(formData).subscribe({
-      next: (res: any) => {
-        console.log('Text information response:', res);
-      },
-      error: (err: HttpErrorResponse) => {
-        console.error('Error fetching text information:', err);
-      }
-    }
-    );
-  }
-
-
-
-
+  // private TextInformation(): void {
+  //   const formData = new FormData();
+  //   formData.append('key', 'value'); // Add any necessary key-value pairs to the FormData
+  //   this.OpenaiService.textInformation(formData).subscribe({
+  //     next: (res: any) => {
+  //       console.log('Text information response:', res);
+  //     },
+  //     error: (err: HttpErrorResponse) => {
+  //       console.error('Error fetching text information:', err);
+  //     }
+  //   }
+  //   );
+  // }
 
 
   // ---- Group colors (shared across all donuts) ----

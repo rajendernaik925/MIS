@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Header } from './header/header';
 import { RouterModule } from '@angular/router';
 import { Sidebar } from './sidebar/sidebar';
+import { LogoutService } from '../core/services/logout.service';
 
 @Component({
   selector: 'app-base-layout',
@@ -10,6 +11,8 @@ import { Sidebar } from './sidebar/sidebar';
   styleUrl: './base-layout.scss',
 })
 export class BaseLayout {
+  private logoutService = inject(LogoutService);
+
   // TODO: drive this from route data (e.g. this.router.events + a
   // `data: { title: '...' }` on each route) if every page needs its own
   // title without hardcoding it here.
@@ -34,8 +37,6 @@ export class BaseLayout {
   }
 
   onLogout(): void {
-    // TODO: clear auth/session state via your auth service, then redirect
-    // e.g. this.authService.logout(); this.router.navigate(['/login']);
-    console.log('Logout requested');
+    this.logoutService.logout();
   }
 }

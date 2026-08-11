@@ -12,30 +12,79 @@
   </div>
 
   <div class="header__actions">
-    <div class="header__badge">
-      <i class="fa-regular fa-calendar header__badge-icon"></i>
-      <select
-        class="header__badge-select"
-        [(ngModel)]="selectedPayPeriod"
-        (change)="onPayPeriodChange()"
-        aria-label="Pay period"
+    <div class="dropdown">
+      <button
+        class="dropdown__trigger"
+        type="button"
+        (click)="togglePayPeriod()"
+        [attr.aria-expanded]="payPeriodOpen()"
+        aria-haspopup="listbox"
       >
-        <option *ngFor="let period of payPeriods" [value]="period.value">
-          Pay Period {{ period.value }}
-        </option>
-      </select>
+        <i class="fa-regular fa-calendar dropdown__icon"></i>
+        <span class="dropdown__label">
+          {{ filterState.loadingPayPeriods() ? 'Loading…' : (payPeriodSelectedLabel() || 'Select period') }}
+        </span>
+        <i class="fa-solid fa-chevron-down dropdown__chevron" [class.dropdown__chevron--open]="payPeriodOpen()"></i>
+      </button>
+
+      <div class="dropdown__panel" *ngIf="payPeriodOpen()" role="listbox">
+        <div class="dropdown__section-label">View by period</div>
+        <button
+          *ngFor="let period of filterState.payPeriods(); trackBy: trackByValue"
+          type="button"
+          class="dropdown__item"
+          [class.dropdown__item--selected]="period.value === filterState.selectedPayPeriod()"
+          role="option"
+          [attr.aria-selected]="period.value === filterState.selectedPayPeriod()"
+          (click)="selectPayPeriod(period.value)"
+        >
+          <i class="fa-regular fa-calendar dropdown__item-icon"></i>
+          <span class="dropdown__item-label">{{ period.label }}</span>
+          <i class="fa-solid fa-check dropdown__check" *ngIf="period.value === filterState.selectedPayPeriod()"></i>
+        </button>
+      </div>
     </div>
 
-    <select
-      class="header__filter"
-      [(ngModel)]="selectedLocation"
-      (change)="onLocationChange()"
-      aria-label="Group filter"
-    >
-      <option value="ALL">All Groups</option>
-      <option value="HYD">Hyderabad (HYD)</option>
-      <option value="MUM">Mumbai (MUM)</option>
-      <option value="CON">Consultants / Contractors</option>
-    </select>
+    <div class="dropdown">
+      <button
+        class="dropdown__trigger dropdown__trigger--location"
+        type="button"
+        (click)="toggleLocation()"
+        [attr.aria-expanded]="locationOpen()"
+        aria-haspopup="listbox"
+      >
+        <span class="dropdown__label">
+          {{ filterState.loadingLocations() ? 'Loading…' : (toTitleCase(locationSelectedLabel()) || 'Select location') }}
+        </span>
+        <i class="fa-solid fa-chevron-down dropdown__chevron" [class.dropdown__chevron--open]="locationOpen()"></i>
+      </button>
+
+      <div class="dropdown__panel" *ngIf="locationOpen()" role="listbox">
+        <div class="dropdown__section-label">View by group</div>
+        <button
+          *ngFor="let loc of filterState.locations(); trackBy: trackByValue"
+          type="button"
+          class="dropdown__item"
+          [class.dropdown__item--selected]="loc.value === filterState.selectedLocation()"
+          role="option"
+          [attr.aria-selected]="loc.value === filterState.selectedLocation()"
+          (click)="selectLocation(loc.value)"
+        >
+          <i class="fa-solid fa-location-dot dropdown__item-icon"></i>
+          <span class="dropdown__item-label">{{ toTitleCase(loc.label) }}</span>
+          <i class="fa-solid fa-check dropdown__check" *ngIf="loc.value === filterState.selectedLocation()"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="employee-card" *ngIf="employeeData() as emp">
+      <div class="employee-card__avatar">
+        <i class="fa-solid fa-user"></i>
+      </div>
+      <div class="employee-card__meta">
+        <span class="employee-card__name">{{ toTitleCase(emp.employeeName) }}</span>
+        <span class="employee-card__id">{{ emp.employeeId }}</span>
+      </div>
+    </div>
   </div>
 </header>

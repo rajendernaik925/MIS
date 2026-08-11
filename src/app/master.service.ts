@@ -2,13 +2,13 @@ import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
 import { catchError, Observable, throwError } from "rxjs";
 import { Router } from "@angular/router";
-import { CoreService } from "../../core/services/core.services";
-import { payableUrls } from "../../../api.constants";
+import { CoreService } from "./core/services/core.services";
+import { masterUrls } from "../api.constants";
 
 @Injectable({
   providedIn: 'root'
 })
-export class payableService {
+export class masterService {
 
   private coreService: CoreService = inject(CoreService);
   private http: HttpClient = inject(HttpClient);
@@ -41,14 +41,14 @@ export class payableService {
     return throwError(() => errorMessage);
   };
 
-  payableList(formData: FormData): Observable<any> {
-    return this.http.post<any>(`${payableUrls.paybleList}`, formData).pipe(
+  locations(): Observable<any> {
+    return this.http.get<any>(`${masterUrls.locations}`).pipe(
       catchError(this.handleError),
     );
   }
 
-  exportExcel(formData: FormData): Observable<any> {
-    return this.http.post<any>(`${payableUrls.exportExcel}`, formData).pipe(
+  payPeriod(): Observable<any> {
+    return this.http.get<any>(`${masterUrls.payPeriod}`).pipe(
       catchError(this.handleError),
     );
   }

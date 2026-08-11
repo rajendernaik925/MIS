@@ -1,19 +1,18 @@
 export const projectName = 'Indent Management';
 
 export const authUrls = {
-  login: '/userlogin',
+  login: '/auth/login',
 };
 
 export const masterUrls = {
-  division: '/master/userbu',
-  plants: '/master/plants',
-  materialTypes: '/master/material-types',
-  materials: '/master/search/material',
-  InitiatorStatus: '/master/indent/filter/status',
-  status: '/master/filter/status',
-  currency: '/master/currency',
-  storageLocation: '/master/storage-location',
+  locations: '/master/locations',
+  payPeriod: '/master/payperiod',
 };
+
+export const payableUrls = {
+  paybleList: '/payable-summary/fetch-summary',
+  exportExcel: '/payable-summary/export-excel',
+}
 
 
 export const commonUrls = {

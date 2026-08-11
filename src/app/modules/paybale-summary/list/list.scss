@@ -1,12 +1,13 @@
-$navy: #2e2a7a;
-$navy-dark: #262363;
+$blue: #1565c0;
+$blue-dark: #0d47a1;
+$blue-head: #14549e;
 $green: #16a34a;
 $green-dark: #128a3e;
-$purple-active: #4f46e5;
 $border-light: #e5e7eb;
 $text-dark: #1f2430;
 $text-muted: #6b7280;
 $bg-page: #f3f4f8;
+$row-stripe: #fafbfd;
 
 .payable-summary {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -18,204 +19,211 @@ $bg-page: #f3f4f8;
   }
 }
 
-// Header
-.summary-header {
-  background: linear-gradient(135deg, $navy 0%, $navy-dark 100%);
+// Single unified card: header + table + pagination all live inside this one box.
+.panel {
+  background: #fff;
   border-radius: 12px;
-  padding: 1.75rem 2rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.08), 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+// Header — one compact row, nothing wraps
+.panel-header {
+  background: linear-gradient(135deg, $blue 0%, $blue-dark 100%);
+  padding: 0.6rem 1.1rem;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 1.5rem;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: nowrap;
+  height: 52px;
+}
 
-  .header-text {
-    flex: 1;
-    min-width: 260px;
-  }
+.panel-header__left {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
 
-  .title-row {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex-wrap: wrap;
+.header-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  flex-shrink: 0;
+}
 
-    h1 {
-      color: #fff;
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin: 0;
-    }
-  }
+.panel-header__left h1 {
+  color: #fff;
+  font-size: 0.98rem;
+  font-weight: 700;
+  margin: 0;
+  flex-shrink: 0;
+}
 
-  .live-badge {
-    background: $green;
-    color: #fff;
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    padding: 0.25rem 0.6rem;
-    border-radius: 999px;
-  }
+.count-badge {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
 
-  .subtitle {
-    color: rgba(255, 255, 255, 0.75);
-    font-size: 0.9rem;
-    margin: 0.5rem 0 0;
-  }
+.header-subtitle {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.75);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.panel-header__right {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
 }
 
 .download-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   background: $green;
   color: #fff;
   border: none;
-  border-radius: 8px;
-  padding: 0.75rem 1.25rem;
-  font-size: 0.9rem;
+  border-radius: 7px;
+  height: 32px;
+  padding: 0 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s ease;
+  flex-shrink: 0;
+  transition: background 0.15s ease, opacity 0.15s ease;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: $green-dark;
   }
+
+  &:disabled,
+  &[aria-disabled='true'] {
+    background: rgba(255, 255, 255, 0.35);
+    color: rgba(255, 255, 255, 0.75);
+    cursor: not-allowed;
+    opacity: 0.8;
+  }
 }
 
-// Filter bar
-.filter-bar {
-  background: #fff;
-  border-radius: 12px;
-  padding: 1.25rem 1.5rem;
-  margin-top: 1.25rem;
+.search-box {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
+  gap: 0.35rem;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 7px;
+  height: 32px;
+  padding: 0 0.6rem;
+  width: 200px;
+  color: $text-muted;
 
-  .filter-group {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    flex-wrap: wrap;
-  }
-
-  .filter-label {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: $text-muted;
-    letter-spacing: 0.04em;
-    margin-right: 0.25rem;
-  }
-}
-
-.filter-pill {
-  border: none;
-  background: #eef0f4;
-  color: $text-dark;
-  font-size: 0.85rem;
-  font-weight: 600;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
-
-  &:hover {
-    background: #e0e2ea;
-  }
-
-  &.active {
-    background: $purple-active;
-    color: #fff;
-  }
-}
-
-.search-input {
-  border: 1px solid $border-light;
-  border-radius: 8px;
-  padding: 0.55rem 0.9rem;
-  font-size: 0.85rem;
-  min-width: 220px;
-  outline: none;
-
-  &:focus {
-    border-color: $purple-active;
-  }
-}
-
-// Table card
-.table-card {
-  background: #fff;
-  border-radius: 12px;
-  margin-top: 1.25rem;
-  overflow: hidden;
-}
-
-.table-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.25rem 1.5rem 1rem;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-
-  h2 {
-    font-size: 1.05rem;
-    font-weight: 700;
-    margin: 0;
+  input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 0.8rem;
     color: $text-dark;
-  }
+    width: 100%;
+    height: 100%;
 
-  .row-count {
-    font-size: 0.85rem;
-    color: $text-muted;
+    &::placeholder {
+      color: $text-muted;
+    }
   }
 }
 
+// Table — bounded height so only the row data scrolls; header row and the
+// pagination footer stay fixed in place, matching the "fixed top/bottom,
+// scroll the middle" behaviour.
 .table-scroll {
-  overflow-x: auto;
+  overflow: auto;
+  max-height: 460px;
+  position: relative;
+
+  // Thin, unobtrusive scrollbar for a more polished feel.
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #cbd2e0;
+    border-radius: 999px;
+  }
 }
 
 table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   min-width: 900px;
 }
 
-thead {
-  background: $navy-dark;
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: $blue-head;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.035em;
+  text-align: left;
+  padding: 0.6rem 0.85rem;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
 
-  th {
-    color: #fff;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-    text-align: left;
-    padding: 0.9rem 1rem;
-    white-space: nowrap;
-    cursor: pointer;
-    user-select: none;
+  &.num {
+    text-align: right;
+  }
 
-    &.num {
-      text-align: right;
-    }
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.08);
-    }
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
   }
 }
 
 tbody {
   tr {
     border-bottom: 1px solid $border-light;
+    transition: background 0.12s ease;
+
+    &:nth-child(even) {
+      background: $row-stripe;
+
+      .sticky-col {
+        background: $row-stripe;
+      }
+    }
 
     &:hover {
-      background: #fafbfc;
+      background: #eef4fc;
+
+      .sticky-col {
+        background: #eef4fc;
+      }
     }
 
     &:last-child {
@@ -224,8 +232,8 @@ tbody {
   }
 
   td {
-    padding: 0.9rem 1rem;
-    font-size: 0.88rem;
+    padding: 0.5rem 0.85rem;
+    font-size: 0.84rem;
     color: $text-dark;
     white-space: nowrap;
 
@@ -242,16 +250,31 @@ tbody {
 
     &.unit-name {
       white-space: normal;
-      min-width: 180px;
+      min-width: 190px;
+      font-weight: 500;
     }
   }
 }
 
+// GROUP column stays fixed on the left while the rest of the table scrolls.
+.sticky-col {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: #fff;
+  box-shadow: 2px 0 4px rgba(16, 24, 40, 0.06);
+}
+
+thead th.sticky-col {
+  z-index: 3;
+  background: $blue-head;
+}
+
 .group-badge {
   display: inline-block;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  padding: 0.2rem 0.55rem;
+  padding: 0.18rem 0.5rem;
   border-radius: 6px;
 
   &.con {
@@ -272,15 +295,71 @@ tbody {
 
 .empty-state {
   text-align: center;
-  padding: 2rem !important;
+  padding: 1.75rem !important;
   color: $text-muted;
   white-space: normal !important;
 }
 
-.table-footnote {
-  font-size: 0.78rem;
-  color: $text-muted;
-  padding: 0.9rem 1.5rem 1.25rem;
-  margin: 0;
+// Pagination — sits below the scroll area, always visible.
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 1.1rem;
   border-top: 1px solid $border-light;
+  flex-wrap: wrap;
+  background: #fff;
+}
+
+.pagination__info {
+  font-size: 0.8rem;
+  color: $text-muted;
+
+  strong {
+    color: $text-dark;
+  }
+}
+
+.pagination__controls {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.pagination__btn,
+.pagination__page {
+  border: 1px solid $border-light;
+  background: #fff;
+  color: $text-dark;
+  font-size: 0.8rem;
+  font-weight: 600;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 0.45rem;
+  border-radius: 7px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: #eef0f4;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.pagination__page--active {
+  background: $blue;
+  border-color: $blue;
+  color: #fff;
+
+  &:hover {
+    background: $blue;
+  }
 }
