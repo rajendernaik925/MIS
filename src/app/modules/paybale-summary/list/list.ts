@@ -93,7 +93,7 @@ export class List {
   totalBusinessUnits = signal(0);
 
   page = signal(1); // 1-based — matches what's shown in the UI and sent to the API
-  size = signal(10);
+  size = signal(20);
   totalPages = signal(0);
 
   loading = signal(false);

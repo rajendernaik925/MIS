@@ -1,5 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FilterStateService } from '../../../base-layout/core/filter-state.service';
+import { joinAndExitService } from '../join.services';
+import { HttpErrorResponse } from '@angular/common/http';
+import { form } from '@angular/forms/signals';
 
 interface DeptBar {
   label: string;
@@ -26,9 +30,39 @@ interface RequiredField {
   styleUrl: './join-list.scss',
 })
 export class JoinList {
+
+  private filterState = inject(FilterStateService);
+  private joinAndExitService = inject(joinAndExitService);
   // Top stat cards
   joinsThisMonth = 47;
   exitsThisMonth = 36;
+
+
+  constructor() {
+    effect(() => {
+      const filters = this.filterState.filtersSignal();
+      // Wait for the filter bar to resolve a real pay period before firing.
+      if (!filters.payPeriod) {
+        return;
+      }
+      console.log("Filters: ", filters);
+      this.loadListData(filters);       
+    });
+  }
+
+  loadListData(filters: { payPeriod: string; location: string }) {
+    const formData = new FormData();
+    formData.append('payPeriod', filters.payPeriod);
+    formData.append('type', filters.location);
+    this.joinAndExitService.joinAndExitList(formData).subscribe({
+      next: (res: any) => {
+        console.log("Join and Exit List: ", res);
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error('Error fetching join and exit data:', err);
+      },
+    })
+  }
   get netHeadcountChange(): number {
     return this.joinsThisMonth - this.exitsThisMonth;
   }
