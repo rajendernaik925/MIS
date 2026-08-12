@@ -1,4 +1,4 @@
-export const projectName = 'Indent Management';
+export const projectName = 'MIS Project';
 
 export const authUrls = {
   login: '/auth/login',
@@ -8,6 +8,10 @@ export const masterUrls = {
   locations: '/master/locations',
   payPeriod: '/master/payperiod',
 };
+
+export const dashboardUrls = {
+  summary: '/dashboard/summary',
+}
 
 export const payableUrls = {
   paybleList: '/payable-summary/fetch-summary',
@@ -27,12 +31,4 @@ export const commonUrls = {
   correctionDone: (module: string) => `/${module}/correct-indent`,
 }
 
-export const commonListUrls = {
-  raiseIndentRequest: '/initiator/raise-indent',
-  indentRequestLIst: (module: string) => `/${module}/indents`,
-}
-
-export const dashboardUrls = {
-  dashboardCounts: '/common/indentsummery',
-}
 

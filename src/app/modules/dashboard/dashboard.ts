@@ -1,10 +1,25 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { Component, DestroyRef, effect, inject, signal, computed } from '@angular/core';
 import { FilterStateService } from '../../base-layout/core/filter-state.service';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { distinctUntilChanged } from 'rxjs/operators';
-import { OpenaiService } from '../openai';
 import { HttpErrorResponse } from '@angular/common/http';
+import { dashboardService } from './dashboard.service';
+
+/** Shape of the KPI summary the /dashboard/summary endpoint returns. */
+interface DashboardSummary {
+  fyYear: string;
+  payPeriod: number;
+  businessUnitId: number | null;
+  businessUnitName: string | null;
+  group: string;
+  manpower: number;
+  teda: number;
+  incentive: number;
+  netSalary: number;
+  totalNetPayable: number;
+  totalActualGross: number;
+  totalDeductions: number;
+  ctcPerMonth: number;
+}
 
 interface StatCard {
   label: string;
@@ -43,90 +58,130 @@ interface BarChartConfig {
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
-export class Dashboard implements OnInit {
-
+export class Dashboard {
   private filterState = inject(FilterStateService);
   private destroyRef = inject(DestroyRef);
+  private dashboardService = inject(dashboardService);
 
-  ngOnInit(): void {
-    this.filterState.filters.pipe(
-      distinctUntilChanged((prev, curr) =>
-        prev.payPeriod === curr.payPeriod && prev.location === curr.location
-      ),
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe((filters) => {
+  // ---- Reactive state ----
+  // Signals throughout, same pattern as the Payable Summary `List`
+  // component: writes from the HTTP callback land directly in Angular's
+  // reactive graph, so the KPI cards always reflect the latest response
+  // without any NG0100 / stale-view risk.
+  summary = signal<DashboardSummary | null>(null);
+  loading = signal(false);
+  loadError = signal(false);
+
+  constructor() {
+    effect(() => {
+      const filters = this.filterState.filtersSignal();
+      // Wait for the filter bar to resolve a real pay period before firing.
+      if (!filters.payPeriod) {
+        return;
+      }
       this.loadDashboardData(filters);
     });
   }
 
   private loadDashboardData(filters: { payPeriod: string; location: string }): void {
-    console.log('Loading dashboard data for:', filters);
+    this.loading.set(true);
+    this.loadError.set(false);
+
+    const formData = new FormData();
+    formData.append('payPeriod', filters.payPeriod);
+    formData.append('type', filters.location);
+
+    // NOTE: previously this called `summary(new FormData())` — an empty
+    // FormData thrown away right after building the real one — so the
+    // backend never actually received payPeriod/type. Passing `formData`
+    // through is the fix.
+    this.dashboardService.summary(formData).subscribe({
+      next: (res: DashboardSummary) => {
+        this.summary.set(res ?? null);
+        this.loading.set(false);
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error('Error fetching dashboard data:', err);
+        this.summary.set(null);
+        this.loading.set(false);
+        this.loadError.set(true);
+      },
+    });
   }
-
-  // private TextInformation(): void {
-  //   const formData = new FormData();
-  //   formData.append('key', 'value'); // Add any necessary key-value pairs to the FormData
-  //   this.OpenaiService.textInformation(formData).subscribe({
-  //     next: (res: any) => {
-  //       console.log('Text information response:', res);
-  //     },
-  //     error: (err: HttpErrorResponse) => {
-  //       console.error('Error fetching text information:', err);
-  //     }
-  //   }
-  //   );
-  // }
-
 
   // ---- Group colors (shared across all donuts) ----
   private readonly groupColors = {
-    hyderabad: '#312e81',
+    hyderabad: '#6366f1',
     mumbai: '#f5a623',
-    consultants: '#0ab86d',
+    consultants: '#10b981',
   };
 
-  // ---- Top stat cards ----
-  statCards: StatCard[] = [
-    {
-      label: 'Total Manpower',
-      value: '6,312',
-      valueColor: '#4338ca',
-      sublabel: 'HYD 1,916 · MUM 4,331 · CON 65',
-    },
-    {
-      label: 'Total Net Payable',
-      value: '₹32.62 Cr',
-      valueColor: '#2563eb',
-      sublabel: '₹32,61,66,162 bank credit',
-    },
-    {
-      label: 'Total Actual Gross',
-      value: '₹34.08 Cr',
-      valueColor: '#0f172a',
-      sublabel: 'HYD + MUM only*',
-    },
-    {
-      label: 'Total Deductions',
-      value: '₹2.59 Cr',
-      valueColor: '#dc2626',
-      sublabel: 'HYD + MUM only*',
-    },
-    {
-      label: 'Total CTC / Month',
-      value: '₹31.92 Cr',
-      valueColor: '#0ab86d',
-      sublabel: '₹31,92,46,892',
-    },
-  ];
+  /**
+   * Live KPI cards, built straight from the /dashboard/summary response.
+   * Falls back to em-dashes while loading/on error so the layout never
+   * jumps or shows stale numbers.
+   */
+  statCards = computed<StatCard[]>(() => {
+    const s = this.summary();
+
+    if (!s) {
+      const placeholder = this.loading() ? '···' : '—';
+      return [
+        { label: 'Total Manpower', value: placeholder, valueColor: '#4338ca', sublabel: this.loading() ? 'Loading…' : 'No data for this selection' },
+        { label: 'Total Net Payable', value: placeholder, valueColor: '#2563eb', sublabel: '' },
+        { label: 'Total Actual Gross', value: placeholder, valueColor: '#0f172a', sublabel: '' },
+        { label: 'Total Deductions', value: placeholder, valueColor: '#dc2626', sublabel: '' },
+        { label: 'Total CTC / Month', value: placeholder, valueColor: '#0ab86d', sublabel: '' },
+      ];
+    }
+
+    return [
+      {
+        label: 'Total Manpower',
+        value: this.formatIndian(s.manpower),
+        valueColor: '#4338ca',
+        sublabel: `${s.group} · Pay Period ${s.payPeriod}`,
+      },
+      {
+        label: 'Total Net Payable',
+        value: this.formatCr(s.totalNetPayable),
+        valueColor: '#2563eb',
+        sublabel: `₹${this.formatIndian(s.totalNetPayable)} bank credit`,
+      },
+      {
+        label: 'Total Actual Gross',
+        value: this.formatCr(s.totalActualGross),
+        valueColor: '#0f172a',
+        sublabel: `₹${this.formatIndian(s.totalActualGross)} gross`,
+      },
+      {
+        label: 'Total Deductions',
+        value: this.formatCr(s.totalDeductions),
+        valueColor: '#dc2626',
+        sublabel: `₹${this.formatIndian(s.totalDeductions)}`,
+      },
+      {
+        label: 'Total CTC / Month',
+        value: this.formatCr(s.ctcPerMonth),
+        valueColor: '#0ab86d',
+        sublabel: `₹${this.formatIndian(s.ctcPerMonth)}`,
+      },
+    ];
+  });
 
   statsFootnote =
-    "*Consultant/contractor rows don't split Gross vs Deductions in the source sheet — see Methodology. KPIs above recompute when you change the group filter in the top bar.";
+    "*Consultant/contractor rows don't split Gross vs Deductions in the source sheet — see Methodology. KPIs above recompute when you change the pay period or location filter in the top bar.";
 
   // ---- Donut charts: Manpower / Net Payable / CTC by Group ----
+  // The /dashboard/summary endpoint returns one aggregate row for whatever
+  // filter is selected (e.g. group: "ALL"), not a per-group breakdown, so
+  // there's no live data source for a group-wise split yet. Kept as
+  // clearly-labelled sample data below until a breakdown endpoint exists —
+  // swap this block for real data the same way statCards was wired up.
   donuts: DonutConfig[] = [
     {
       title: 'Manpower by Group',
-      subtitle: 'Hyderabad · Mumbai · Consultants',
+      subtitle: 'Hyderabad · Mumbai · Consultants (sample)',
       segments: [
         { label: 'Hyderabad', value: 1916, color: this.groupColors.hyderabad },
         { label: 'Mumbai', value: 4331, color: this.groupColors.mumbai },
@@ -135,7 +190,7 @@ export class Dashboard implements OnInit {
     },
     {
       title: 'Net Payable by Group',
-      subtitle: '₹ this pay period',
+      subtitle: '₹ this pay period (sample)',
       segments: [
         { label: 'Hyderabad', value: 9.85, color: this.groupColors.hyderabad },
         { label: 'Mumbai', value: 21.9, color: this.groupColors.mumbai },
@@ -144,7 +199,7 @@ export class Dashboard implements OnInit {
     },
     {
       title: 'CTC / Month by Group',
-      subtitle: '₹ monthly cost-to-company',
+      subtitle: '₹ monthly cost-to-company (sample)',
       segments: [
         { label: 'Hyderabad', value: 9.6, color: this.groupColors.hyderabad },
         { label: 'Mumbai', value: 21.4, color: this.groupColors.mumbai },
@@ -154,9 +209,11 @@ export class Dashboard implements OnInit {
   ];
 
   // ---- Top 8 units by Net Payable, per group ----
+  // Same caveat as the donuts above: sample data pending a unit-level
+  // breakdown endpoint.
   barCharts: BarChartConfig[] = [
     {
-      title: 'Top 8 Hyderabad Units by Net Payable',
+      title: 'Top 8 Hyderabad Units by Net Payable (sample)',
       color: this.groupColors.hyderabad,
       rows: [
         { label: 'HHC - CORPORATE', value: 11500000 },
@@ -170,7 +227,7 @@ export class Dashboard implements OnInit {
       ],
     },
     {
-      title: 'Top 8 Mumbai Units by Net Payable',
+      title: 'Top 8 Mumbai Units by Net Payable (sample)',
       color: this.groupColors.mumbai,
       rows: [
         { label: 'HHC - MAIN', value: 34000000 },
@@ -236,5 +293,10 @@ export class Dashboard implements OnInit {
     }
 
     return `${negative ? '-' : ''}${formatted}${decPart ? '.' + decPart : ''}`;
+  }
+
+  /** Formats a rupee amount in Crores, e.g. 335419563 -> "₹33.54 Cr". */
+  formatCr(value: number): string {
+    return `₹${(value / 1e7).toFixed(2)} Cr`;
   }
 }

@@ -12,9 +12,9 @@
           </svg>
         </span>
         <h1>Payable Summary</h1>
-        <span class="count-badge">{{ totalRecords }}</span>
-        <span class="header-subtitle" *ngIf="currentFilters.payPeriod">
-          &middot; Pay Period {{ currentFilters.payPeriod }} &middot; {{ currentFilters.location }}
+        <span class="count-badge">{{ totalRecords() }}</span>
+        <span class="header-subtitle" *ngIf="currentFilters().payPeriod">
+          &middot; Pay Period {{ currentFilters().payPeriod }} &middot; {{ currentFilters().location }}
         </span>
       </div>
 
@@ -22,9 +22,9 @@
         <button
           class="download-btn"
           type="button"
-          [disabled]="!hasData"
-          [attr.aria-disabled]="!hasData"
-          [title]="hasData ? 'Download rows as Excel/CSV' : 'No data available to download'"
+          [disabled]="!hasData() || downloadingExcel()"
+          [attr.aria-disabled]="!hasData() || downloadingExcel()"
+          [title]="hasData() ? 'Download rows as Excel' : 'No data available to download'"
           (click)="downloadCsv()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -32,7 +32,7 @@
             <line x1="12" y1="18" x2="12" y2="12"></line>
             <polyline points="9 15 12 18 15 15"></polyline>
           </svg>
-          Download Excel
+          {{ downloadingExcel() ? 'Downloading…' : 'Download Excel' }}
         </button>
 
         <div class="search-box">
@@ -43,7 +43,7 @@
           <input
             type="text"
             placeholder="Search business unit..."
-            [ngModel]="searchText"
+            [ngModel]="searchText()"
             (ngModelChange)="onSearchInput($event)" />
         </div>
       </div>
@@ -67,8 +67,8 @@
           </tr>
         </thead>
         <tbody>
-          <ng-container *ngIf="!loading && !loadError">
-            <tr *ngFor="let row of sortedRows">
+          <ng-container *ngIf="!loading() && !loadError()">
+            <tr *ngFor="let row of sortedRows()">
               <td class="sticky-col">
                 <span class="group-badge" [ngClass]="row.group.toLowerCase()">{{ row.group }}</span>
               </td>
@@ -82,16 +82,16 @@
               <td class="num">{{ formatNumber(row.deductions) }}</td>
               <td class="num">{{ formatNumber(row.ctcPerMonth) }}</td>
             </tr>
-            <tr *ngIf="sortedRows.length === 0">
+            <tr *ngIf="sortedRows().length === 0">
               <td colspan="10" class="empty-state">No business units to display.</td>
             </tr>
           </ng-container>
 
-          <tr *ngIf="loading">
+          <tr *ngIf="loading()">
             <td colspan="10" class="empty-state">Loading payable summary…</td>
           </tr>
 
-          <tr *ngIf="loadError">
+          <tr *ngIf="loadError()">
             <td colspan="10" class="empty-state">
               Couldn't load the payable summary. Please try again.
             </td>
@@ -101,22 +101,22 @@
     </div>
 
     <!-- Pagination — stays put at the bottom of the panel; only rows above scroll -->
-    @if (totalRecords > 0) {
+    @if (totalRecords() > 0) {
       <div class="pagination">
         <span class="pagination__info">
-          Showing <strong>{{ startIndex }}</strong>–<strong>{{ endIndex }}</strong>
-          of <strong>{{ totalRecords }}</strong> records
+          Showing <strong>{{ startIndex() }}</strong>–<strong>{{ endIndex() }}</strong>
+          of <strong>{{ totalRecords() }}</strong> records
         </span>
         <div class="pagination__controls">
-          <button class="pagination__btn" (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1">
+          <button class="pagination__btn" (click)="changePage(page() - 1)" [disabled]="page() === 1">
             <i class="bi bi-chevron-left"></i>
           </button>
-          @for (p of pageNumbers; track p) {
-            <button class="pagination__page" [class.pagination__page--active]="p === currentPage"
+          @for (p of pageNumbers(); track p) {
+            <button class="pagination__page" [class.pagination__page--active]="p === page()"
               (click)="changePage(p)">{{ p }}</button>
           }
-          <button class="pagination__btn" (click)="changePage(currentPage + 1)"
-            [disabled]="currentPage >= totalPages">
+          <button class="pagination__btn" (click)="changePage(page() + 1)"
+            [disabled]="page() >= totalPages()">
             <i class="bi bi-chevron-right"></i>
           </button>
         </div>

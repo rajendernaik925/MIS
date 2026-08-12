@@ -1,7 +1,7 @@
-import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { Component, DestroyRef, effect, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subject, debounceTime, delay, distinctUntilChanged, finalize } from 'rxjs';
+import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { payableService } from '../payable-summary.services';
 import { FilterStateService } from '../../../base-layout/core/filter-state.service';
@@ -62,66 +62,69 @@ type SortKey = keyof BusinessUnitRow;
   templateUrl: './list.html',
   styleUrl: './list.scss',
 })
-export class List implements OnInit {
+export class List {
   private payableService: payableService = inject(payableService);
   private filterState = inject(FilterStateService);
   private destroyRef = inject(DestroyRef);
 
+  // ---- Reactive state ----
+  // Everything the template reads is a signal. Signals participate in
+  // Angular's fine-grained reactivity graph directly, so writing to them
+  // (even from an async HTTP callback, or synchronously inside another
+  // signal's reaction) always lands correctly on the next render — there's
+  // no dirty-checking race to win, and therefore no NG0100
+  // ExpressionChangedAfterItHasBeenCheckedError to work around with
+  // setTimeout/delay(0) hacks. This is also why the table used to stay
+  // blank until the user clicked something: the old delay(0) pipeline
+  // could update the plain component fields in a tick where nothing told
+  // Angular to re-check the view, so the (correctly loaded) data just sat
+  // there unrendered until some unrelated event (a click) forced a CD run.
+
   // Active filters driving the API call — kept in sync with FilterStateService.
-  currentFilters: ActiveFilters = { payPeriod: '', location: 'HYD' };
+  currentFilters = signal<ActiveFilters>({ payPeriod: '', location: 'HYD' });
 
   // Free-text search — bound to the input, pushed through a debounced stream.
-  searchText = '';
+  searchText = signal('');
   private searchInput$ = new Subject<string>();
 
-  allRows: BusinessUnitRow[] = [];
-  totalBusinessUnits = 0;
+  allRows = signal<BusinessUnitRow[]>([]);
+  totalBusinessUnits = signal(0);
 
-  page = 0; // zero-based, mirrors the API
-  size = 10;
-  totalPages = 0;
+  page = signal(1); // 1-based — matches what's shown in the UI and sent to the API
+  size = signal(10);
+  totalPages = signal(0);
 
-  loading = false;
-  loadError = false;
+  loading = signal(false);
+  loadError = signal(false);
 
-  sortKey: SortKey | null = null;
-  sortAsc = true;
+  sortKey = signal<SortKey | null>(null);
+  sortAsc = signal(true);
 
-  ngOnInit(): void {
-    // Re-fetch whenever pay period or location changes.
-    this.filterState.filters
-      .pipe(
-        distinctUntilChanged(
-          (prev, curr) => prev.payPeriod === curr.payPeriod && prev.location === curr.location,
-        ),
-        // IMPORTANT: FilterStateService notifies synchronously — on init because
-        // it's a BehaviorSubject (fires immediately on subscribe, still inside
-        // Angular's first change-detection pass for this component), and later
-        // because a dropdown's click handler calls `.next(...)` directly, which
-        // reaches our subscriber synchronously within that same click's call
-        // stack, before Angular ticks for that event.
-        //
-        // Mutating template-bound state (currentFilters, totalRecords, etc.) in
-        // either case, in the same tick Angular already rendered, causes
-        // NG0100 ExpressionChangedAfterItHasBeenCheckedError.
-        //
-        // `delay(0)` reschedules the emission onto a macrotask (setTimeout),
-        // guaranteeing it lands in a genuinely separate tick from whatever
-        // triggered it — unlike a microtask (Promise.resolve().then()), this
-        // can't get pulled back into the same change-detection cycle even if
-        // the underlying service replays synchronously (e.g. shareReplay).
-        delay(0),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe(filters => {
-        this.currentFilters = filters;
-        this.page = 0;
-        this.payableList();
-      });
+  constructor() {
+    // React to pay period / location changes from the shared filter bar.
+    // `effect()` always runs with the *latest* values of every signal it
+    // read last time — including the very first (default) values — and
+    // re-runs whenever any of them change, batched into a single
+    // microtask flush. We skip the run until a real pay period is
+    // present so we don't fire a request with an empty filter before the
+    // filter bar's own data has loaded.
+    effect(() => {
+      const filters = this.filterState.filtersSignal();
+      if (!filters.payPeriod) {
+        return;
+      }
+
+      const prev = this.currentFilters();
+      if (prev.payPeriod === filters.payPeriod && prev.location === filters.location) {
+        return;
+      }
+
+      this.currentFilters.set(filters);
+      this.page.set(1);
+      this.fetchList();
+    });
 
     // Re-fetch on search text, debounced so we don't hit the API per keystroke.
-    // This is always user-triggered well after the initial render, so it's safe
-    // to update state directly (no microtask needed here).
     this.searchInput$
       .pipe(
         debounceTime(400),
@@ -129,9 +132,9 @@ export class List implements OnInit {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe(term => {
-        this.searchText = term;
-        this.page = 0;
-        this.payableList();
+        this.searchText.set(term);
+        this.page.set(1);
+        this.fetchList();
       });
   }
 
@@ -139,33 +142,42 @@ export class List implements OnInit {
     this.searchInput$.next(value.trim());
   }
 
-  payableList(): void {
-    this.loading = true;
-    this.loadError = false;
+  fetchList(): void {
+    // Guard against firing before the filter bar has resolved a pay period.
+    if (!this.currentFilters().payPeriod) {
+      return;
+    }
+
+    this.loading.set(true);
+    this.loadError.set(false);
 
     const formData = new FormData();
-    formData.append('payPeriod', this.currentFilters.payPeriod);
-    formData.append('type', this.currentFilters.location);
-    formData.append('page', String(this.page));
-    formData.append('size', String(this.size));
-    formData.append('searchText', this.searchText);
+    formData.append('payPeriod', this.currentFilters().payPeriod);
+    formData.append('type', this.currentFilters().location);
+    // Backend pagination is 1-based (first page = 1), matching the UI —
+    // send `page` as-is, no conversion needed.
+    formData.append('page', String(this.page()));
+    formData.append('size', String(this.size()));
+    formData.append('searchText', this.searchText());
 
     this.payableService.payableList(formData).subscribe({
       next: (res: PayableListResponse) => {
-        this.allRows = (res.content ?? []).map(row => this.mapApiRow(row));
-        this.totalBusinessUnits = res.totalElements ?? this.allRows.length;
-        this.totalPages = res.totalPages ?? (this.allRows.length ? 1 : 0);
-        this.page = res.page ?? this.page;
-        this.size = res.size ?? this.size;
-        this.loading = false;
+        this.allRows.set((res?.content ?? []).map(row => this.mapApiRow(row)));
+        this.totalBusinessUnits.set(res?.totalElements ?? this.allRows().length);
+        this.totalPages.set(res?.totalPages ?? (this.allRows().length ? 1 : 0));
+        // Backend's `page` in the response is 1-based too, so it maps
+        // straight onto our 1-based `page` signal — no offset needed.
+        if (res?.page !== undefined) this.page.set(res.page);
+        if (res?.size !== undefined) this.size.set(res.size);
+        this.loading.set(false);
       },
       error: (err: any) => {
         console.error('Payable List Error:', err);
-        this.allRows = [];
-        this.totalBusinessUnits = 0;
-        this.totalPages = 0;
-        this.loading = false;
-        this.loadError = true;
+        this.allRows.set([]);
+        this.totalBusinessUnits.set(0);
+        this.totalPages.set(0);
+        this.loading.set(false);
+        this.loadError.set(true);
       },
     });
   }
@@ -187,80 +199,69 @@ export class List implements OnInit {
   }
 
   /** Client-side sort of the current page's rows. */
-  get sortedRows(): BusinessUnitRow[] {
-    let rows = [...this.allRows];
+  sortedRows = computed<BusinessUnitRow[]>(() => {
+    const rows = [...this.allRows()];
+    const key = this.sortKey();
 
-    if (this.sortKey) {
-      const key = this.sortKey;
+    if (key) {
+      const asc = this.sortAsc();
       rows.sort((a, b) => {
         const valA = a[key];
         const valB = b[key];
         if (valA === null) return 1;
         if (valB === null) return -1;
         if (typeof valA === 'number' && typeof valB === 'number') {
-          return this.sortAsc ? valA - valB : valB - valA;
+          return asc ? valA - valB : valB - valA;
         }
-        return this.sortAsc
+        return asc
           ? String(valA).localeCompare(String(valB))
           : String(valB).localeCompare(String(valA));
       });
     }
 
     return rows;
-  }
+  });
 
   /** Drives the enable/disable state of the download button. */
-  get hasData(): boolean {
-    return !this.loading && !this.loadError && this.allRows.length > 0;
-  }
+  hasData = computed(() => !this.loading() && !this.loadError() && this.allRows().length > 0);
 
   sortBy(key: SortKey): void {
-    if (this.sortKey === key) {
-      this.sortAsc = !this.sortAsc;
+    if (this.sortKey() === key) {
+      this.sortAsc.update(v => !v);
     } else {
-      this.sortKey = key;
-      this.sortAsc = true;
+      this.sortKey.set(key);
+      this.sortAsc.set(true);
     }
   }
 
   // ---- Pagination (drives the template's `pagination` block) ----
 
-  get totalRecords(): number {
-    return this.totalBusinessUnits;
-  }
+  totalRecords = computed(() => this.totalBusinessUnits());
 
-  get currentPage(): number {
-    return this.page + 1; // 1-based for display
-  }
+  startIndex = computed(() => (this.totalRecords() === 0 ? 0 : (this.page() - 1) * this.size() + 1));
 
-  get startIndex(): number {
-    return this.totalRecords === 0 ? 0 : this.page * this.size + 1;
-  }
+  endIndex = computed(() => Math.min(this.page() * this.size(), this.totalRecords()));
 
-  get endIndex(): number {
-    return Math.min((this.page + 1) * this.size, this.totalRecords);
-  }
-
-  get pageNumbers(): number[] {
+  pageNumbers = computed<number[]>(() => {
     const maxButtons = 5;
-    const total = this.totalPages;
+    const total = this.totalPages();
     if (total <= 0) return [];
 
-    let start = Math.max(1, this.currentPage - Math.floor(maxButtons / 2));
+    let start = Math.max(1, this.page() - Math.floor(maxButtons / 2));
     let end = Math.min(total, start + maxButtons - 1);
     start = Math.max(1, end - maxButtons + 1);
 
     const pages: number[] = [];
     for (let p = start; p <= end; p++) pages.push(p);
     return pages;
-  }
+  });
 
   changePage(p: number): void {
-    if (p < 1 || p > this.totalPages || p === this.currentPage) {
+    if (p < 1 || p > this.totalPages() || p === this.page()) {
       return;
     }
-    this.page = p - 1;
-    this.payableList();
+    this.page.set(p);
+    this.fetchList();
   }
 
   formatNumber(value: number | null): string {
@@ -268,37 +269,48 @@ export class List implements OnInit {
     return value.toLocaleString('en-IN');
   }
 
+  downloadingExcel = signal(false);
+
   downloadCsv(): void {
-    if (!this.hasData) {
+    if (!this.hasData() || this.downloadingExcel()) {
       return;
     }
 
-    const headers = ['Group', 'Business Unit', 'Manpower', 'TEDA', 'Incentive', 'Net Salary', 'Net Payable', 'Actual Gross', 'Deductions', 'CTC / Month'];
-    const rows = this.sortedRows.map(r => [
-      r.group,
-      r.businessUnit,
-      r.manpower,
-      r.teda,
-      r.incentive,
-      r.netSalary,
-      r.netPayable,
-      r.actualGross ?? '',
-      r.deductions ?? '',
-      r.ctcPerMonth,
-    ]);
+    const formData = new FormData();
+    formData.append('payPeriod', this.currentFilters().payPeriod);
+    formData.append('type', this.currentFilters().location);
 
-    const csvContent = [headers, ...rows]
-      .map(row => row.map(cell => `"${cell}"`).join(','))
-      .join('\n');
+    this.downloadingExcel.set(true);
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `payable-summary-${this.currentFilters.payPeriod}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    this.payableService.exportExcel(formData).subscribe({
+      next: (res) => {
+        const blob = res.body;
+        if (!blob) {
+          this.downloadingExcel.set(false);
+          return;
+        }
+
+        // Prefer the filename the backend suggests via Content-Disposition,
+        // e.g. `attachment; filename="Payable_Summary_202607.xlsx"`.
+        const disposition = res.headers.get('content-disposition') ?? '';
+        const match = /filename\*?=(?:UTF-8'')?"?([^";]+)"?/i.exec(disposition);
+        const filename = match?.[1] ?? `payable-summary-${this.currentFilters().payPeriod}.xlsx`;
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        this.downloadingExcel.set(false);
+      },
+      error: (err) => {
+        console.error('Export Excel Error:', err);
+        this.downloadingExcel.set(false);
+      },
+    });
   }
 }
