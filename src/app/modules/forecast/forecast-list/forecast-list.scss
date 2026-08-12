@@ -1,0 +1,158 @@
+.table-shell {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.table-wrapper {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+
+  height: 100%;          // keep full height, don't let it shrink
+  max-height: 550px;      // adjust to whatever height you're currently using
+  overflow-y: auto;       // vertical scroll stays functional
+  overflow-x: auto;       // horizontal scroll stays functional
+
+  transition: filter 0.3s ease;
+
+  // Hide scrollbar visually, scroll still works
+  scrollbar-width: none;       // Firefox
+  -ms-overflow-style: none;    // IE/Edge
+
+  &::-webkit-scrollbar {
+    display: none;              // Chrome/Safari/Edge
+  }
+
+  &.blurred {
+    filter: blur(6px);
+    pointer-events: none;
+    user-select: none;
+  }
+}
+
+.forecast-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  min-width: 900px;
+
+  thead {
+    background: #f1f3f6;
+    position: sticky;   // keeps header visible while scrolling vertically
+    top: 0;
+    z-index: 1;
+
+    th {
+      text-align: left;
+      padding: 12px 14px;
+      font-weight: 600;
+      color: #374151;
+      border-bottom: 1px solid #e5e7eb;
+      white-space: nowrap;
+    }
+  }
+
+  tbody {
+    tr {
+      border-bottom: 1px solid #f0f1f3;
+      transition: background 0.15s ease;
+
+      &:hover { background: #fafbfc; }
+    }
+
+    td {
+      padding: 11px 14px;
+      color: #1f2430;
+      white-space: nowrap;
+    }
+  }
+
+  .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .positive { color: #16a34a; font-weight: 600; }
+  .negative { color: #dc2626; font-weight: 600; }
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+
+  &.on-track { background: #dcfce7; color: #15803d; }
+  &.over-budget { background: #fef9c3; color: #92400e; }
+  &.under-budget { background: #dbeafe; color: #1d4ed8; }
+  &.critical { background: #fee2e2; color: #b91c1c; }
+}
+
+// Glass overlay stays same height as table-shell (position: absolute; inset: 0)
+.glass-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  animation: fadeIn 0.3s ease;
+
+  background:
+    radial-gradient(circle at 15% 30%, rgba(226, 240, 255, 0.9) 0%, rgba(140, 190, 235, 0.55) 18%, transparent 40%),
+    linear-gradient(135deg, #1c4f8a 0%, #163d72 35%, #0f2c56 65%, #081a38 100%);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.glass-content {
+  text-align: center;
+  padding: 20px 40px;
+  max-width: 480px;
+}
+
+.glass-title {
+  margin: 0 0 10px;
+  font-size: 46px;
+  font-weight: 800;
+  color: #eaf2ff;
+  letter-spacing: -0.01em;
+}
+
+.glass-line-1,
+.glass-line-2 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.glass-line-3 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.5;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.upcoming-badge {
+  display: inline-block;
+  padding: 5px 16px;
+  margin-bottom: 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #eaf2ff;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}

@@ -1,13 +1,15 @@
-$blue: #1565c0;
-$blue-dark: #0d47a1;
-$blue-head: #14549e;
+$blue: #5646e0;
+$blue-dark: #392c93;
+$blue-head: #4636bd;
 $green: #16a34a;
 $green-dark: #128a3e;
+$blue-link: #ead81c;
+$blue-link-dark: #abef0b;
 $border-light: #e5e7eb;
 $text-dark: #1f2430;
 $text-muted: #6b7280;
-$bg-page: #f3f4f8;
-$row-stripe: #fafbfd;
+$bg-page: #f2f2f2;
+$row-stripe: #fafafa;
 
 .payable-summary {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -219,10 +221,10 @@ tbody {
     }
 
     &:hover {
-      background: #eef4fc;
+      background: #eef1ff;
 
       .sticky-col {
-        background: #eef4fc;
+        background: #eef1ff;
       }
     }
 
@@ -345,7 +347,7 @@ thead th.sticky-col {
   transition: background 0.15s ease, color 0.15s ease, opacity 0.15s ease;
 
   &:hover:not(:disabled) {
-    background: #eef0f4;
+    background: #f2f2f2;
   }
 
   &:disabled {
@@ -361,5 +363,36 @@ thead th.sticky-col {
 
   &:hover {
     background: $blue;
+  }
+}
+
+
+.summary-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: $blue-link;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  height: 32px;
+  padding: 0 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s ease, opacity 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: $blue-link-dark;
+  }
+
+  &:disabled,
+  &[aria-disabled='true'] {
+    background: rgba(255, 255, 255, 0.35);
+    color: rgba(255, 255, 255, 0.75);
+    cursor: not-allowed;
+    opacity: 0.8;
   }
 }

@@ -1,19 +1,18 @@
 // sidebar.scss
 //
-// Palette: deep slate + brand green accent (ties into the app's existing
-// brand colour used across styles.scss: .custom-bg / .custom-btn / swal
-// confirm button = #0AB86D). Swap the tokens below to re-theme.
+// Palette: deep indigo panel + violet accent, driven by the app-wide brand
+// tokens in styles.scss (--brand-*). Swap the tokens below to re-theme.
 :host {
-  --sb-bg: #0f172a;              // slate-900 (main panel)
-  --sb-bg-soft: rgba(30, 41, 59, 0.55);   // slate-800/55 (brand row / footer)
-  --sb-border: rgba(51, 65, 85, 0.6);     // slate-700/60
-  --sb-text: #94a3b8;            // slate-400 (default nav text)
+  --sb-bg: var(--brand-950, #171442);              // deep indigo (main panel)
+  --sb-bg-soft: rgba(57, 44, 147, 0.45);            // brand-800/45 (brand row / footer)
+  --sb-border: rgba(139, 92, 246, 0.18);            // violet/18 hairline
+  --sb-text: #b7b3e0;            // muted lavender (default nav text)
   --sb-text-strong: #ffffff;
-  --sb-hover-bg: #1e293b;        // slate-800
-  --sb-accent: #0ab86d;          // brand green
-  --sb-accent-strong: #16a34a;   // brand green, deeper
-  --sb-accent-contrast: #06281c; // dark text on top of accent fills
-  --sb-active-bg: rgba(10, 184, 109, 0.16);
+  --sb-hover-bg: var(--brand-900, #241d5e);
+  --sb-accent: var(--accent-violet, #8b5cf6);       // brand violet
+  --sb-accent-strong: var(--brand-500, #6a5cf0);    // brand indigo, deeper
+  --sb-accent-contrast: #ffffff;                    // text on top of accent fills
+  --sb-active-bg: rgba(139, 92, 246, 0.18);
   --sb-danger: #f87171;          // red-400 (logout hover)
   --sb-danger-bg: rgba(220, 38, 38, 0.15);
 

@@ -1,9 +1,60 @@
+// ============================================================================
+// THEME — Deep Indigo / Violet (professional MIS palette)
+// Single source of truth for brand colour. Every shared surface (utility
+// classes below, sidebar, header, login, alerts) reads from these tokens —
+// re-theme the whole app by editing this block.
+// ============================================================================
+:root {
+  --brand-50: #eef1ff;
+  --brand-100: #e0e4ff;
+  --brand-200: #c7cdfe;
+  --brand-300: #a5aefc;
+  --brand-400: #8385f7;
+  --brand-500: #6a5cf0;
+  --brand-600: #5646e0;
+  // primary — buttons, links, active states
+  --brand-700: #4636bd;
+  // hover / pressed
+  --brand-800: #392c93;
+  // deep surfaces (sidebar)
+  --brand-900: #241d5e;
+  // darkest surfaces (sidebar base)
+  --brand-950: #171442;
+
+  --accent-violet: #8b5cf6;
+  // secondary accent (avatars, highlights)
+  --accent-gold: #c9a15a;
+  // sparing use — small premium touches
+
+  --ink-900: #1c1a3d;
+  // primary text
+  --ink-600: #565478;
+  // secondary text
+  --ink-400: #8583a3;
+  // muted text
+  --surface-app: #f2f2f2;
+  // page background — neutral light grey (not tinted)
+  --surface-card: #ffffff;
+  // cards, panels
+  --surface-muted: #fafafa;
+  // table headers, zebra stripes, subtle panels
+  --surface-hover: #f5f5f7;
+  // row hover, neutral (not brand-tinted)
+  --surface-line: #e6e6ea;
+  // neutral border/divider grey
+
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --info: #0ea5e9;
+}
+
 html,
 body {
   height: 100vh;
   margin: 0;
   font-family: plus-jakarta-sans, sans-serif;
-  background: #f2f2f2;
+  background: var(--surface-app);
 }
 
 // NOTE: layout rules (.main-layout, section.header, .content-layout,
@@ -23,26 +74,26 @@ body {
 }
 
 .custom-bg {
-  background-color: #0ab86d !important;
+  background-color: var(--brand-600) !important;
 }
 
 .custom-btn {
-  background-color: #0ab86d !important;
+  background-color: var(--brand-600) !important;
   color: #fff !important;
-  border-color: #0ab86d !important;
+  border-color: var(--brand-600) !important;
 
   &:hover,
   &:focus,
   &:active {
-    background-color: #0ab86d !important;
+    background-color: var(--brand-700) !important;
     color: #fff !important;
-    border-color: #0ab86d !important;
+    border-color: var(--brand-700) !important;
     box-shadow: none !important; // optional (removes bootstrap outline)
   }
 }
 
 .custom-tooltip {
-  --bs-tooltip-bg: #0ab86d;
+  --bs-tooltip-bg: var(--brand-600);
   --bs-tooltip-color: #fff;
   --bs-tooltip-border-radius: 0.375rem;
   /* Adjust border radius as needed */
@@ -53,7 +104,7 @@ body {
 }
 
 .custom-text {
-  color: #0ab86d;
+  color: var(--brand-600);
 }
 
 .g-3,
@@ -97,13 +148,13 @@ body {
 }
 
 .swal2-btn-confirm {
-  background: linear-gradient(180deg, #16a34a 0%, #0ab86d 100%) !important;
+  background: linear-gradient(180deg, var(--brand-500) 0%, var(--brand-700) 100%) !important;
   color: #fff !important;
 }
 
 .swal2-btn-confirm:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 16px rgba(10, 184, 109, 0.3) !important;
+  box-shadow: 0 8px 16px rgba(86, 70, 224, 0.3) !important;
 }
 
 .swal2-btn-cancel {
@@ -113,4 +164,45 @@ body {
 
 .swal2-btn-cancel:hover {
   background: #e2e8f0 !important;
+}
+
+// ============================================================================
+// TABLES — shared light theme for every list/table screen (Bootstrap
+// `.table` elements and the app's own custom `table`/div-grid components
+// pick this up automatically since they build on the same neutral tokens).
+// ============================================================================
+.table {
+  --bs-table-bg: var(--surface-card);
+  margin-bottom: 0;
+
+  thead th {
+    background: var(--surface-muted) !important;
+    color: var(--ink-600);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    border-bottom: 1px solid var(--surface-line);
+    white-space: nowrap;
+  }
+
+  tbody td {
+    color: var(--ink-900);
+    vertical-align: middle;
+    border-bottom: 1px solid var(--surface-line);
+  }
+
+  tbody tr:hover {
+    background: var(--surface-hover);
+  }
+
+  &.table-striped tbody tr:nth-of-type(odd) {
+    background: var(--surface-muted);
+  }
+}
+
+.table-responsive {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--surface-line);
 }

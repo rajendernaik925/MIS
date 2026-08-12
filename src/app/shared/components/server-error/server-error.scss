@@ -145,7 +145,7 @@
 }
 
 .btn-primary-action {
-  background: linear-gradient(180deg, #0ab86d 0%, #089958 100%);
+  background: linear-gradient(180deg, var(--brand-500, #6a5cf0) 0%, var(--brand-700, #4636bd) 100%);
   color: #fff;
 }
 

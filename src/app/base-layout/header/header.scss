@@ -82,17 +82,17 @@
     font: inherit;
 
     &:hover {
-      border-color: #0ab86d;
+      border-color: var(--brand-600);
     }
 
     &:focus-visible {
       outline: none;
-      border-color: #0ab86d;
-      box-shadow: 0 0 0 3px rgba(10, 184, 109, 0.12);
+      border-color: var(--brand-600);
+      box-shadow: 0 0 0 3px rgba(86, 70, 224, 0.14);
     }
 
     &--location {
-      border-color: #0ab86d;
+      border-color: var(--brand-600);
     }
   }
 
@@ -163,7 +163,7 @@
     }
 
     &--selected {
-      background: #e6f7ef;
+      background: var(--brand-50, #eef1ff);
     }
   }
 
@@ -192,7 +192,7 @@
 
   &__check {
     font-size: 10px;
-    color: #0ab86d;
+    color: var(--brand-600);
     flex-shrink: 0;
   }
 }
@@ -253,7 +253,7 @@
   gap: 9px;
   height: 42px;
   padding: 0 12px 0 6px;
-  background: #f5f4ff;
+  background: var(--brand-50, #eef1ff);
   border-radius: 10px;
 
   &__avatar {
@@ -264,7 +264,7 @@
     height: 30px;
     border-radius: 50%;
     background: #ffffff;
-    color: #6d5ce8;
+    color: var(--accent-violet, #8b5cf6);
     font-size: 13px;
     flex-shrink: 0;
   }
@@ -278,7 +278,7 @@
   &__name {
     font-size: 12.5px;
     font-weight: 700;
-    color: #1e1b3a;
+    color: var(--ink-900, #1c1a3d);
     white-space: nowrap;
     max-width: 160px;
     overflow: hidden;
@@ -288,7 +288,7 @@
   &__id {
     font-size: 11px;
     font-weight: 600;
-    color: #6d5ce8;
+    color: var(--accent-violet, #8b5cf6);
   }
 }
 

@@ -1,0 +1,57 @@
+<div class="forecast-container">
+
+  <div class="table-shell">
+
+    <div class="table-wrapper" [class.blurred]="isLoading">
+      <table class="forecast-table">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Sub-Category</th>
+            <th>Month</th>
+            <th>Region</th>
+            <th>Owner</th>
+            <th class="num">Actual</th>
+            <th class="num">Forecast</th>
+            <th class="num">Variance</th>
+            <th class="num">Variance %</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of forecastData">
+            <td>{{ row.category }}</td>
+            <td>{{ row.subCategory }}</td>
+            <td>{{ row.month }} {{ row.year }}</td>
+            <td>{{ row.region }}</td>
+            <td>{{ row.owner }}</td>
+            <td class="num">₹{{ row.actual | number }}</td>
+            <td class="num">₹{{ row.forecast | number }}</td>
+            <td class="num" [ngClass]="row.variance >= 0 ? 'positive' : 'negative'">
+              {{ row.variance >= 0 ? '+' : '' }}₹{{ row.variance | number }}
+            </td>
+            <td class="num" [ngClass]="row.variancePercent >= 0 ? 'positive' : 'negative'">
+              {{ row.variancePercent >= 0 ? '+' : '' }}{{ row.variancePercent | number:'1.1-1' }}%
+            </td>
+            <td>
+              <span class="status-badge" [ngClass]="getStatusClass(row.status)">
+                {{ row.status }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Glass overlay with a simple "Upcoming" badge -->
+    <div class="glass-overlay" *ngIf="isLoading">
+      <div class="glass-content">
+        <span class="upcoming-badge">Upcoming</span>
+        <h1 class="glass-title">Forecasting</h1>
+        <p class="glass-line-3">Your dynamic report is being generated</p>
+      </div>
+    </div>
+
+  </div>
+
+</div>

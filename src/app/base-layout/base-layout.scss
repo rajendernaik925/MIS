@@ -6,7 +6,7 @@ body {
   height: 100vh;
   margin: 0;
   font-family: plus-jakarta-sans, sans-serif;
-  background: #f2f2f2;
+  background: var(--surface-app, #f2f2f2);
 }
 
 // Row layout: <app-sidebar> (full viewport height) sits on the left,

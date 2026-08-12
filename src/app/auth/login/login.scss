@@ -7,21 +7,23 @@
 }
 
 .login-shell {
-  // ---- Design tokens: executive MIS palette (navy / steel / muted gold) ----
-  --navy-950: #0a1628;
-  --navy-800: #0f2038;
-  --navy-700: #16304f;
-  --steel-500: #4a7fa5;
-  --steel-300: #8fb4cf;
-  --gold-500: #b8924a;
-  --gold-300: #d9b876;
-  --bg-canvas: #eef1f5;
+  // ---- Design tokens: executive MIS palette (deep indigo / violet / muted gold) ----
+  // Mapped onto the app-wide brand tokens in styles.scss so this screen
+  // matches the sidebar/header rather than running its own palette.
+  --navy-950: var(--brand-950, #171442);
+  --navy-800: var(--brand-900, #241d5e);
+  --navy-700: var(--brand-800, #392c93);
+  --steel-500: var(--accent-violet, #8b5cf6);
+  --steel-300: var(--brand-200, #c7cdfe);
+  --gold-500: var(--accent-gold, #c9a15a);
+  --gold-300: #e3c98e;
+  --bg-canvas: var(--surface-app, #f4f4fb);
   --surface: #ffffff;
-  --text-strong: #14202e;
-  --text-muted: #5b6b7e;
-  --line: #dce2ea;
-  --danger: #c0392b;
-  --success: #1e8a5f;
+  --text-strong: var(--ink-900, #1c1a3d);
+  --text-muted: var(--ink-600, #565478);
+  --line: var(--surface-line, #e3e1f5);
+  --danger: #dc2626;
+  --success: #16a34a;
 
   --font-display: 'IBM Plex Sans', 'Segoe UI', sans-serif;
   --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
@@ -282,8 +284,8 @@
   font-weight: 700;
   letter-spacing: 0.02em;
   color: var(--navy-700);
-  background: #eef4f9;
-  border: 1px solid #d3e2ee;
+  background: var(--brand-50, #eef1ff);
+  border: 1px solid var(--brand-100, #e0e4ff);
 }
 
 .auth-card h2 {
@@ -359,7 +361,7 @@
 .form-control:focus {
   outline: none;
   border-color: var(--steel-500);
-  box-shadow: 0 0 0 3px rgba(74, 127, 165, 0.16);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.16);
   background: #fff;
 }
 
@@ -391,7 +393,7 @@
 }
 
 .toggle-password:hover {
-  background: #eef4f9;
+  background: var(--brand-50, #eef1ff);
 }
 
 .field-error {

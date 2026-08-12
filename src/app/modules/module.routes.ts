@@ -12,7 +12,7 @@ export const Routes: Route[] = [
         loadChildren: () => import('./dashboard/dashboard.routes').then(m => m.Routes),
       },
       {
-        path: 'payable-summary',
+        path: 'payable',
         loadChildren: () => import('./paybale-summary/payable-summary.routes').then(m => m.Routes),
       },
       {
@@ -30,6 +30,10 @@ export const Routes: Route[] = [
       {
         path: 'methodology',
         loadChildren: () => import('./methodology/methodology.routes').then(m => m.Routes),
+      },
+      {
+        path: 'forecast',
+        loadChildren: () => import('./forecast/forecast.routes').then(m => m.Routes),
       },
       {
         path: '',

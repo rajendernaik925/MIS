@@ -5,6 +5,7 @@ import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { payableService } from '../payable-summary.services';
 import { FilterStateService } from '../../../base-layout/core/filter-state.service';
+import { Router } from '@angular/router';
 
 /** Shape of a single row exactly as the API returns it. */
 interface ApiBusinessUnitRow {
@@ -66,6 +67,7 @@ export class List {
   private payableService: payableService = inject(payableService);
   private filterState = inject(FilterStateService);
   private destroyRef = inject(DestroyRef);
+  private route: Router = inject(Router);
 
   // ---- Reactive state ----
   // Everything the template reads is a signal. Signals participate in
@@ -312,5 +314,13 @@ export class List {
         this.downloadingExcel.set(false);
       },
     });
+  }
+
+  individualSummary() {
+    if (!this.hasData()) {
+      return;
+    }
+
+    this.route.navigate(['payable/individual-summary']);
   }
 }
