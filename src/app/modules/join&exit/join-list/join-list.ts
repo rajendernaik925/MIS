@@ -1,148 +1,226 @@
-import { Component, effect, inject } from '@angular/core';
+import { Component, DestroyRef, effect, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FilterStateService } from '../../../base-layout/core/filter-state.service';
 import { joinAndExitService } from '../join.services';
-import { HttpErrorResponse } from '@angular/common/http';
-import { form } from '@angular/forms/signals';
 
-interface DeptBar {
-  label: string;
-  joins: number;
-  exits: number;
+/** Shape of a single row exactly as the API returns it. */
+interface ApiJoinExitRow {
+  callName: string;
+  businessUnitId: number;
+  businessUnitName: string;
+  departmentName: string;
+  leftEmployees: number;
+  newJoiners: number;
+  totalEmployees: number;
 }
 
-interface DesignationBar {
-  label: string;
-  joins: number;
-  exits: number;
+/** Shape of the full paginated response envelope. */
+interface JoinExitListResponse {
+  content: ApiJoinExitRow[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
 }
 
-interface RequiredField {
-  name: string;
-  description: string;
+/** Shape used by the template. */
+interface JoinExitRow {
+  callName: string;
+  businessUnitId: number;
+  businessUnit: string;
+  department: string;
+  newJoiners: number;
+  leftEmployees: number;
+  totalEmployees: number;
+  netChange: number;
 }
+
+/** Location/pay-period filters coming from the shared filter bar. */
+interface ActiveFilters {
+  payPeriod: string;
+  location: string;
+}
+
+type SortKey = keyof JoinExitRow;
 
 @Component({
   selector: 'app-join-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './join-list.html',
   styleUrl: './join-list.scss',
 })
 export class JoinList {
-
   private filterState = inject(FilterStateService);
   private joinAndExitService = inject(joinAndExitService);
-  // Top stat cards
-  joinsThisMonth = 47;
-  exitsThisMonth = 36;
+  private destroyRef = inject(DestroyRef);
 
+  // ---- Reactive state ----
+  currentFilters = signal<ActiveFilters>({ payPeriod: '', location: 'HYD' });
+
+  search = signal('');
+  private searchInput$ = new Subject<string>();
+
+  allRows = signal<JoinExitRow[]>([]);
+  totalRecords = signal(0);
+
+  page = signal(1); // 1-based
+  size = signal(10);
+  totalPages = signal(0);
+
+  loading = signal(false);
+  loadError = signal(false);
+
+  sortKey = signal<SortKey | null>(null);
+  sortAsc = signal(true);
 
   constructor() {
+    // React to pay period / location changes from the shared filter bar.
     effect(() => {
       const filters = this.filterState.filtersSignal();
-      // Wait for the filter bar to resolve a real pay period before firing.
       if (!filters.payPeriod) {
         return;
       }
-      console.log("Filters: ", filters);
-      this.loadListData(filters);       
+
+      const prev = this.currentFilters();
+      if (prev.payPeriod === filters.payPeriod && prev.location === filters.location) {
+        return;
+      }
+
+      this.currentFilters.set(filters);
+      this.page.set(1);
+      this.fetchList();
+    });
+
+    // Re-fetch on search text, debounced so we don't hit the API per keystroke.
+    this.searchInput$
+      .pipe(
+        debounceTime(400),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(term => {
+        this.search.set(term);
+        this.page.set(1);
+        this.fetchList();
+      });
+  }
+
+  onSearchInput(value: string): void {
+    this.searchInput$.next(value.trim());
+  }
+
+  fetchList(): void {
+    if (!this.currentFilters().payPeriod) {
+      return;
+    }
+
+    this.loading.set(true);
+    this.loadError.set(false);
+
+    const formData = new FormData();
+    formData.append('payPeriod', this.currentFilters().payPeriod);
+    formData.append('type', this.currentFilters().location);
+    formData.append('page', String(this.page()));
+    formData.append('size', String(this.size()));
+    formData.append('search', this.search());
+
+    this.joinAndExitService.joinAndExitList(formData).subscribe({
+      next: (res: JoinExitListResponse) => {
+        this.allRows.set((res?.content ?? []).map(row => this.mapApiRow(row)));
+        this.totalRecords.set(res?.totalElements ?? this.allRows().length);
+        this.totalPages.set(res?.totalPages ?? (this.allRows().length ? 1 : 0));
+        if (res?.page !== undefined) this.page.set(res.page);
+        if (res?.size !== undefined) this.size.set(res.size);
+        this.loading.set(false);
+      },
+      error: (err: any) => {
+        console.error('Join and Exit List Error:', err);
+        this.allRows.set([]);
+        this.totalRecords.set(0);
+        this.totalPages.set(0);
+        this.loading.set(false);
+        this.loadError.set(true);
+      },
     });
   }
 
-  loadListData(filters: { payPeriod: string; location: string }) {
-    const formData = new FormData();
-    formData.append('payPeriod', filters.payPeriod);
-    formData.append('type', filters.location);
-    this.joinAndExitService.joinAndExitList(formData).subscribe({
-      next: (res: any) => {
-        console.log("Join and Exit List: ", res);
-      },
-      error: (err: HttpErrorResponse) => {
-        console.error('Error fetching join and exit data:', err);
-      },
-    })
-  }
-  get netHeadcountChange(): number {
-    return this.joinsThisMonth - this.exitsThisMonth;
-  }
-  attritionRate = 0.65;
-
-  // Joins vs Exits by Department
-  departmentBars: DeptBar[] = [
-    { label: 'Production', joins: 14, exits: 9 },
-    { label: 'Quality', joins: 6, exits: 3 },
-    { label: 'R&D', joins: 4, exits: 2 },
-    { label: 'Sales & Marketing', joins: 9, exits: 11 },
-    { label: 'HR & Admin', joins: 3, exits: 2 },
-    { label: 'Finance', joins: 2, exits: 1 },
-    { label: 'IT', joins: 5, exits: 3 },
-    { label: 'Supply Chain', joins: 4, exits: 5 },
-  ];
-
-  // Joins vs Exits by Designation
-  designationBars: DesignationBar[] = [
-    { label: 'Trainee/Associate', joins: 22, exits: 14 },
-    { label: 'Executive', joins: 15, exits: 13 },
-    { label: 'Senior Executive', joins: 6, exits: 5 },
-    { label: 'Manager', joins: 5, exits: 5 },
-    { label: 'Senior Manager', joins: 0, exits: 2 },
-    { label: 'AGM & above', joins: 0, exits: 1 },
-  ];
-
-  requiredFields: RequiredField[] = [
-    { name: 'Employee ID', description: 'Joins with the payable sheet' },
-    { name: 'Business Unit', description: 'Must match Payable Summary naming exactly' },
-    { name: 'Department', description: 'Production, Quality, R&D, HR, Finance, IT, Sales, Supply Chain...' },
-    { name: 'Designation / Grade', description: 'Trainee, Executive, Manager, Sr. Manager...' },
-    { name: 'Employment Type', description: 'Permanent / Contractor / Intern' },
-    { name: 'Date of Joining / Date of Leaving', description: 'DD-MM-YYYY, blank DOL if still active' },
-    { name: 'Exit Reason', description: 'Resignation, Termination, Retirement, Contract End...' },
-  ];
-
-  // ---- Vertical chart (department) helpers ----
-  get departmentYAxisTicks(): number[] {
-    const max = Math.max(...this.departmentBars.flatMap(d => [d.joins, d.exits]), 1);
-    return this.buildNiceTicks(max, 8);
+  private mapApiRow(row: ApiJoinExitRow): JoinExitRow {
+    return {
+      callName: row.callName,
+      businessUnitId: row.businessUnitId,
+      businessUnit: row.businessUnitName,
+      department: row.departmentName,
+      newJoiners: row.newJoiners,
+      leftEmployees: row.leftEmployees,
+      totalEmployees: row.totalEmployees,
+      netChange: row.newJoiners - row.leftEmployees,
+    };
   }
 
-  getVerticalBarHeightPct(value: number, ticks: number[]): number {
-    const max = ticks[0] || 1;
-    return (value / max) * 100;
-  }
+  /** Client-side sort of the current page's rows. */
+  sortedRows = computed<JoinExitRow[]>(() => {
+    const rows = [...this.allRows()];
+    const key = this.sortKey();
 
-  // ---- Horizontal chart (designation) helpers ----
-  get designationXAxisTicks(): number[] {
-    const max = Math.max(...this.designationBars.flatMap(d => [d.joins, d.exits]), 1);
-    return this.buildNiceTicks(max, 6).reverse(); // ascending left-to-right
-  }
-
-  getHorizontalBarWidthPct(value: number, ticks: number[]): number {
-    const max = ticks[ticks.length - 1] || 1;
-    return (value / max) * 100;
-  }
-
-  private buildNiceTicks(max: number, tickCount: number): number[] {
-    const niceMax = this.niceCeiling(max);
-    const step = niceMax / (tickCount - 1);
-    const ticks: number[] = [];
-    for (let i = tickCount - 1; i >= 0; i--) {
-      ticks.push(Math.round(step * i));
+    if (key) {
+      const asc = this.sortAsc();
+      rows.sort((a, b) => {
+        const valA = a[key];
+        const valB = b[key];
+        if (typeof valA === 'number' && typeof valB === 'number') {
+          return asc ? valA - valB : valB - valA;
+        }
+        return asc
+          ? String(valA).localeCompare(String(valB))
+          : String(valB).localeCompare(String(valA));
+      });
     }
-    return ticks;
+
+    return rows;
+  });
+
+  hasData = computed(() => !this.loading() && !this.loadError() && this.allRows().length > 0);
+
+  sortBy(key: SortKey): void {
+    if (this.sortKey() === key) {
+      this.sortAsc.update(v => !v);
+    } else {
+      this.sortKey.set(key);
+      this.sortAsc.set(true);
+    }
   }
 
-  private niceCeiling(value: number): number {
-    if (value === 0) return 1;
-    const exponent = Math.floor(Math.log10(value));
-    const magnitude = Math.pow(10, exponent);
-    const residual = value / magnitude;
-    let niceResidual: number;
-    if (residual <= 1) niceResidual = 1;
-    else if (residual <= 2) niceResidual = 2;
-    else if (residual <= 2.5) niceResidual = 2.5;
-    else if (residual <= 5) niceResidual = 5;
-    else niceResidual = 10;
-    return niceResidual * magnitude;
+  // ---- Pagination ----
+  startIndex = computed(() => (this.totalRecords() === 0 ? 0 : (this.page() - 1) * this.size() + 1));
+  endIndex = computed(() => Math.min(this.page() * this.size(), this.totalRecords()));
+
+  pageNumbers = computed<number[]>(() => {
+    const maxButtons = 5;
+    const total = this.totalPages();
+    if (total <= 0) return [];
+
+    let start = Math.max(1, this.page() - Math.floor(maxButtons / 2));
+    let end = Math.min(total, start + maxButtons - 1);
+    start = Math.max(1, end - maxButtons + 1);
+
+    const pages: number[] = [];
+    for (let p = start; p <= end; p++) pages.push(p);
+    return pages;
+  });
+
+  changePage(p: number): void {
+    if (p < 1 || p > this.totalPages() || p === this.page()) {
+      return;
+    }
+    this.page.set(p);
+    this.fetchList();
+  }
+
+  formatNumber(value: number): string {
+    return value.toLocaleString('en-IN');
   }
 }

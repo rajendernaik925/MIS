@@ -1,11 +1,12 @@
 export const projectName = 'MIS Project';
+const authUrl = '/auth';
 const constantMasterUrl = '/master';
 const constantDashboardUrl = '/dashboard';
 const constantPayableUrl = '/payable-summary';
 const constantjoinAndExitUrl = '/join-exit';
 
 export const authUrls = {
-  login: '/auth/login',
+  login: `${authUrl}/login`,
 };
 
 export const masterUrls = {

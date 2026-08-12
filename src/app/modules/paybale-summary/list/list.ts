@@ -86,14 +86,14 @@ export class List {
   currentFilters = signal<ActiveFilters>({ payPeriod: '', location: 'HYD' });
 
   // Free-text search — bound to the input, pushed through a debounced stream.
-  searchText = signal('');
+  search = signal('');
   private searchInput$ = new Subject<string>();
 
   allRows = signal<BusinessUnitRow[]>([]);
   totalBusinessUnits = signal(0);
 
   page = signal(1); // 1-based — matches what's shown in the UI and sent to the API
-  size = signal(20);
+  size = signal(10);
   totalPages = signal(0);
 
   loading = signal(false);
@@ -134,7 +134,7 @@ export class List {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe(term => {
-        this.searchText.set(term);
+        this.search.set(term);
         this.page.set(1);
         this.fetchList();
       });
@@ -156,11 +156,9 @@ export class List {
     const formData = new FormData();
     formData.append('payPeriod', this.currentFilters().payPeriod);
     formData.append('type', this.currentFilters().location);
-    // Backend pagination is 1-based (first page = 1), matching the UI —
-    // send `page` as-is, no conversion needed.
     formData.append('page', String(this.page()));
     formData.append('size', String(this.size()));
-    formData.append('searchText', this.searchText());
+    formData.append('search', this.search());
 
     this.payableService.payableList(formData).subscribe({
       next: (res: PayableListResponse) => {

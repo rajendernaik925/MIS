@@ -1,0 +1,68 @@
+
+// Glass overlay stays same height as table-shell (position: absolute; inset: 0)
+
+.glass-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  animation: fadeIn 0.3s ease;
+
+  background:
+    radial-gradient(circle at 15% 30%, rgba(226, 240, 255, 0.9) 0%, rgba(140, 190, 235, 0.55) 18%, transparent 40%),
+    linear-gradient(135deg, #1c4f8a 0%, #163d72 35%, #0f2c56 65%, #081a38 100%);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.glass-content {
+  text-align: center;
+  padding: 20px 40px;
+  max-width: 480px;
+}
+
+.glass-title {
+  margin: 0 0 10px;
+  font-size: 46px;
+  font-weight: 800;
+  color: #eaf2ff;
+  letter-spacing: -0.01em;
+}
+
+.glass-line-1,
+.glass-line-2 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.glass-line-3 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.5;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.upcoming-badge {
+  display: inline-block;
+  padding: 5px 16px;
+  margin-bottom: 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #eaf2ff;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}

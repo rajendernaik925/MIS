@@ -29,11 +29,11 @@ export class Sidebar {
   navItems: NavItem[] = [
     { label: 'Overview', icon: 'fa-solid fa-grip', route: '/dashboard' },
     { label: 'Payable Summary', icon: 'fa-solid fa-file-invoice-dollar', route: '/payable' },
-    { label: 'Location Bifurcation', icon: 'fa-solid fa-scale-balanced', route: '/location-bifurcation' },
+    // { label: 'Location Bifurcation', icon: 'fa-solid fa-scale-balanced', route: '/location-bifurcation' },
     // { label: 'Join & Exit', icon: 'fa-solid fa-user-clock', route: '/joins-exits' },
-    { label: 'Join & Exit', icon: 'fa-solid fa-user-clock', route: '/joins-exits', badge: 'Sample' },
-    { label: 'Interns & Contractors', icon: 'fa-solid fa-graduation-cap', route: '/interns' },
-    { label: 'Methodology', icon: 'fa-solid fa-lightbulb', route: '/methodology' },
+    { label: 'Join & Exit', icon: 'fa-solid fa-user-clock', route: '/joins-exits' },
+    // { label: 'Interns & Contractors', icon: 'fa-solid fa-graduation-cap', route: '/interns' },
+    // { label: 'Methodology', icon: 'fa-solid fa-lightbulb', route: '/methodology' },
     { label: 'Forecast',  icon: 'fa-solid fa-chart-line',  route: '/forecast', badge: 'upcoming' },
   ];
 

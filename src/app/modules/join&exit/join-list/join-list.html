@@ -1,132 +1,107 @@
-<div class="join-exit-dashboard">
+<div class="join-exit-list">
+  <div class="panel">
 
-  <!-- Warning banner -->
-  <div class="warning-banner">
-    <div class="warning-title">
-      <span class="warning-icon">⚠️</span>
-      <h3>Illustrative sample data</h3>
-      <span class="badge-real">NOT YOUR REAL RECORDS</span>
-    </div>
-    <p class="warning-text">
-      Your payable sheet has month-end totals per business unit, not individual employee records —
-      so there's no join/exit date, department or designation to chart yet. This page is fully
-      wired; swap in a real feed (fields below) and it goes live with no rebuild.
-    </p>
-  </div>
-
-  <!-- Stat cards -->
-  <div class="stat-cards">
-    <div class="stat-card">
-      <span class="stat-label">JOINS (SAMPLE MONTH)</span>
-      <div class="stat-value joins">{{ joinsThisMonth }}</div>
-    </div>
-    <div class="stat-card">
-      <span class="stat-label">EXITS (SAMPLE MONTH)</span>
-      <div class="stat-value exits">{{ exitsThisMonth }}</div>
-    </div>
-    <div class="stat-card">
-      <span class="stat-label">NET HEADCOUNT CHANGE</span>
-      <div class="stat-value net" [class.negative]="netHeadcountChange < 0">
-        {{ netHeadcountChange >= 0 ? '+' : '' }}{{ netHeadcountChange }}
-      </div>
-    </div>
-    <div class="stat-card">
-      <span class="stat-label">ATTRITION RATE (ILLUSTRATIVE)</span>
-      <div class="stat-value attrition">{{ attritionRate }}%</div>
-    </div>
-  </div>
-
-  <!-- Charts -->
-  <div class="chart-row">
-
-    <!-- Department vertical bar chart -->
-    <div class="chart-card">
-      <div class="chart-title-row">
-        <h4>Joins vs Exits by Department</h4>
-        <span class="badge-sample">SAMPLE</span>
+    <!-- Header -->
+    <div class="panel-header">
+      <div class="panel-header__left">
+        <span class="header-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="8.5" cy="7" r="4"></circle>
+            <line x1="20" y1="8" x2="20" y2="14"></line>
+            <line x1="23" y1="11" x2="17" y2="11"></line>
+          </svg>
+        </span>
+        <h1>Join &amp; Exit List</h1>
+        <span class="count-badge">{{ totalRecords() }}</span>
+        <span class="header-subtitle" *ngIf="currentFilters().payPeriod">
+          &middot; Pay Period {{ currentFilters().payPeriod }} &middot; {{ currentFilters().location }}
+        </span>
       </div>
 
-      <div class="legend">
-        <span class="legend-item"><i class="swatch joins-color"></i> Joins</span>
-        <span class="legend-item"><i class="swatch exits-color"></i> Exits</span>
-      </div>
-
-      <div class="vertical-chart">
-        <div class="y-axis">
-          <span *ngFor="let tick of departmentYAxisTicks">{{ tick }}</span>
-        </div>
-        <div class="v-bars-area">
-          <div class="gridlines">
-            <div class="gridline" *ngFor="let tick of departmentYAxisTicks"></div>
-          </div>
-          <div class="v-bars">
-            <div class="v-bar-group" *ngFor="let dept of departmentBars">
-              <div class="v-bar-pair">
-                <div
-                  class="v-bar joins-color"
-                  [style.height.%]="getVerticalBarHeightPct(dept.joins, departmentYAxisTicks)">
-                </div>
-                <div
-                  class="v-bar exits-color"
-                  [style.height.%]="getVerticalBarHeightPct(dept.exits, departmentYAxisTicks)">
-                </div>
-              </div>
-              <span class="v-bar-label">{{ dept.label }}</span>
-            </div>
-          </div>
+      <div class="panel-header__right">
+        <div class="search-box">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="7"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input
+            type="text"
+            placeholder="Search business unit or department..."
+            [ngModel]="search()"
+            (ngModelChange)="onSearchInput($event)" />
         </div>
       </div>
     </div>
 
-    <!-- Designation horizontal bar chart -->
-    <div class="chart-card">
-      <div class="chart-title-row">
-        <h4>Joins vs Exits by Designation</h4>
-        <span class="badge-sample">SAMPLE</span>
-      </div>
+    <!-- Table -->
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th class="sticky-col" (click)="sortBy('callName')">CALL NAME</th>
+            <th (click)="sortBy('businessUnit')">BUSINESS UNIT</th>
+            <th (click)="sortBy('department')">DEPARTMENT</th>
+            <th class="num" (click)="sortBy('totalEmployees')">TOTAL EMPLOYEES</th>
+            <th class="num" (click)="sortBy('newJoiners')">NEW JOINERS</th>
+            <th class="num" (click)="sortBy('leftEmployees')">LEFT EMPLOYEES</th>
+            <th class="num" (click)="sortBy('netChange')">NET CHANGE</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngIf="!loading() && !loadError()">
+            <tr *ngFor="let row of sortedRows()">
+              <td class="sticky-col">
+                <span class="call-badge">{{ row.callName }}</span>
+              </td>
+              <td class="unit-name">{{ row.businessUnit }}</td>
+              <td>{{ row.department }}</td>
+              <td class="num bold">{{ formatNumber(row.totalEmployees) }}</td>
+              <td class="num positive">+{{ formatNumber(row.newJoiners) }}</td>
+              <td class="num negative">-{{ formatNumber(row.leftEmployees) }}</td>
+              <td class="num" [ngClass]="row.netChange >= 0 ? 'positive' : 'negative'">
+                {{ row.netChange > 0 ? '+' : '' }}{{ formatNumber(row.netChange) }}
+              </td>
+            </tr>
+            <tr *ngIf="sortedRows().length === 0">
+              <td colspan="7" class="empty-state">No join/exit records to display.</td>
+            </tr>
+          </ng-container>
 
-      <div class="legend">
-        <span class="legend-item"><i class="swatch joins-color-alt"></i> Joins</span>
-        <span class="legend-item"><i class="swatch exits-color-alt"></i> Exits</span>
-      </div>
+          <tr *ngIf="loading()">
+            <td colspan="7" class="empty-state">Loading join &amp; exit list…</td>
+          </tr>
 
-      <div class="horizontal-chart">
-        <div class="h-rows">
-          <div class="h-row" *ngFor="let d of designationBars">
-            <span class="h-row-label">{{ d.label }}</span>
-            <div class="h-bars">
-              <div class="h-bar-track">
-                <div
-                  class="h-bar joins-color-alt"
-                  [style.width.%]="getHorizontalBarWidthPct(d.joins, designationXAxisTicks)">
-                </div>
-              </div>
-              <div class="h-bar-track">
-                <div
-                  class="h-bar exits-color-alt"
-                  [style.width.%]="getHorizontalBarWidthPct(d.exits, designationXAxisTicks)">
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="x-axis">
-          <span *ngFor="let tick of designationXAxisTicks">{{ tick }}</span>
-        </div>
-      </div>
+          <tr *ngIf="loadError()">
+            <td colspan="7" class="empty-state">
+              Couldn't load the join &amp; exit list. Please try again.
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-  </div>
-
-  <!-- Fields required table -->
-  <div class="fields-card">
-    <h4>Fields required to make this page live</h4>
-    <div class="fields-table">
-      <div class="fields-row" *ngFor="let field of requiredFields">
-        <span class="field-name">{{ field.name }}</span>
-        <span class="field-description">{{ field.description }}</span>
+    <!-- Pagination -->
+    @if (totalRecords() > 0) {
+      <div class="pagination">
+        <span class="pagination__info">
+          Showing <strong>{{ startIndex() }}</strong>–<strong>{{ endIndex() }}</strong>
+          of <strong>{{ totalRecords() }}</strong> records
+        </span>
+        <div class="pagination__controls">
+          <button class="pagination__btn" (click)="changePage(page() - 1)" [disabled]="page() === 1">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+          @for (p of pageNumbers(); track p) {
+            <button class="pagination__page" [class.pagination__page--active]="p === page()"
+              (click)="changePage(p)">{{ p }}</button>
+          }
+          <button class="pagination__btn" (click)="changePage(page() + 1)"
+            [disabled]="page() >= totalPages()">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </div>
       </div>
-    </div>
+    }
   </div>
-
 </div>
