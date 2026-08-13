@@ -1,7 +1,127 @@
-<div class="glass-overlay">
-    <div class="glass-content">
-        <span class="upcoming-badge">Upcoming</span>
-        <h1 class="glass-title">Individual Summary</h1>
-        <p class="glass-line-3">Your dynamic report is being generated</p>
+<div class="manage">
+
+  <!-- ===================== Page header ===================== -->
+  <!-- <div class="manage__header">
+    <div>
+      <h2 class="manage__title">Payable Summary</h2>
+      <p class="manage__subtitle" *ngIf="summary() as s">
+        FY {{ s.fyYear }} · Pay Period {{ s.payPeriod }} · {{ rowLabel() }}
+      </p>
     </div>
+  </div> -->
+
+  <div class="manage__status manage__status--error" *ngIf="loadError()">
+    <span class="manage__status-dot"></span>
+    Couldn't load the payable summary for this selection. Please try again.
+  </div>
+
+  <ng-container *ngIf="!loadError() && (summary() || loading())">
+
+    <!-- ===================== Quick-glance KPI strip ===================== -->
+    <div class="manage__stats">
+      <div class="stat-card" [class.stat-card--loading]="loading()" *ngFor="let card of statCards()">
+        <span class="stat-card__badge" *ngIf="card.badge">{{ card.badge }}</span>
+        <p class="stat-card__label">{{ card.label }}</p>
+        <p class="stat-card__value" [style.color]="card.color">{{ card.value }}</p>
+        <p class="stat-card__sublabel">{{ card.sublabel }}</p>
+      </div>
+    </div>
+
+    <!-- ===================== Consolidated summary table ===================== -->
+    <section class="panel summary-card">
+      <div class="summary-card__band">
+        <h3>Consolidated Summary</h3>
+      </div>
+
+      <div class="summary-table-wrap">
+        <table class="summary-table" *ngIf="summary(); else tableLoading">
+          <thead>
+            <tr>
+              <th class="summary-table__unit">Business Unit Name</th>
+              <th *ngFor="let col of tableColumns()">{{ col.label }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="summary-table__total">
+              <td class="summary-table__unit">{{ rowLabel() }}</td>
+              <td *ngFor="let col of tableColumns()">{{ col.value }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <ng-template #tableLoading>
+          <p class="summary-table__loading">Loading summary…</p>
+        </ng-template>
+      </div>
+    </section>
+
+    <!-- ===================== Composition & ratios ===================== -->
+    <section class="manage__grid" *ngIf="summary()">
+      <div class="panel insight-card">
+        <div class="panel__heading">
+          <h3 class="panel__title">Payout Composition</h3>
+          <p class="panel__subtitle">How Total Actual Gross breaks down, and how much of it reaches employees</p>
+        </div>
+
+        <div class="flow-block">
+          <div class="flow-block__label-row">
+            <span>Actual Gross composition</span>
+          </div>
+          <div class="flow-bar">
+            <div
+              class="flow-bar__seg"
+              *ngFor="let seg of grossComposition()"
+              [style.width.%]="seg.pct"
+              [style.background]="seg.color">
+              <span class="flow-bar__seg-tooltip">{{ seg.label }}: {{ seg.value }} ({{ seg.pct }}%)</span>
+            </div>
+          </div>
+          <div class="flow-legend">
+            <div class="flow-legend__item" *ngFor="let seg of grossComposition()">
+              <span class="flow-legend__dot" [style.background]="seg.color"></span>
+              {{ seg.label }} · {{ seg.pct }}%
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-block">
+          <div class="flow-block__label-row">
+            <span>Gross → Net Payable</span>
+          </div>
+          <div class="flow-bar">
+            <div
+              class="flow-bar__seg"
+              *ngFor="let seg of payoutFlow()"
+              [style.width.%]="seg.pct"
+              [style.background]="seg.color">
+              <span class="flow-bar__seg-tooltip">{{ seg.label }}: {{ seg.value }} ({{ seg.pct }}%)</span>
+            </div>
+          </div>
+          <div class="flow-legend">
+            <div class="flow-legend__item" *ngFor="let seg of payoutFlow()">
+              <span class="flow-legend__dot" [style.background]="seg.color"></span>
+              {{ seg.label }} · {{ seg.pct }}%
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel insight-card">
+        <div class="panel__heading">
+          <h3 class="panel__title">Key Ratios</h3>
+          <p class="panel__subtitle">Derived from this period's totals</p>
+        </div>
+
+        <div class="ratio-tiles">
+          <div class="ratio-tile" *ngFor="let tile of ratioTiles()">
+            <p class="ratio-tile__label">{{ tile.label }}</p>
+            <p class="ratio-tile__value" [style.color]="tile.color">{{ tile.value }}</p>
+            <p class="ratio-tile__caption">{{ tile.caption }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </ng-container>
+
 </div>

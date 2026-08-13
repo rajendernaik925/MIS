@@ -109,6 +109,7 @@ export class JoinList {
       });
   }
 
+
   onSearchInput(value: string): void {
     this.searchInput$.next(value.trim());
   }
@@ -222,5 +223,17 @@ export class JoinList {
 
   formatNumber(value: number): string {
     return value.toLocaleString('en-IN');
+  }
+
+  downloadExcel() {
+    const formData = new FormData();
+    formData.append('payPeriod', this.currentFilters().payPeriod);
+    formData.append('type', this.currentFilters().location);
+    this.joinAndExitService.exportExcel(formData).subscribe({
+      next: (res: any) => {
+        console.log(res)
+      }
+    })
+
   }
 }

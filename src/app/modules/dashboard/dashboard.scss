@@ -7,59 +7,36 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  // padding: 20px 4px 12px;
+  gap: 10px;
   isolation: isolate;
-
-  // Soft, colourful backdrop so the translucent glass cards actually read
-  // as "glass" — flat white behind frosted-white cards has nothing to
-  // refract. Purely decorative, sits behind everything via z-index.
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    z-index: -1;
-    border-radius: 50%;
-    filter: blur(70px);
-    opacity: 0.35;
-    pointer-events: none;
-  }
-
-  &::before {
-    width: 420px;
-    height: 420px;
-    top: -160px;
-    left: -100px;
-    background: radial-gradient(circle, var(--brand-500, #6a5cf0), transparent 70%);
-  }
-
-  &::after {
-    width: 480px;
-    height: 480px;
-    top: 120px;
-    right: -160px;
-    background: radial-gradient(circle, var(--accent-violet, #8b5cf6), transparent 70%);
-  }
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden; // hard stop: never let this page scroll sideways
+  // Decorative background blobs removed — they were bleeding a purple
+  // gradient tint through the translucent glass cards and the un-carded
+  // table area behind them.
 }
 
 // Shared glass surface — frosted, translucent, soft border + shadow, with
 // a gentle lift on hover to feel tactile rather than flat.
 .glass {
-  background: rgba(255, 255, 255, 0.62);
+  position: relative;
+  background: rgba(255, 255, 255, 0.86);
   backdrop-filter: blur(18px) saturate(160%);
   -webkit-backdrop-filter: blur(18px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(226, 232, 240, 0.9);
   border-radius: 16px;
   box-shadow:
     0 1px 2px rgba(15, 23, 42, 0.04),
-    0 8px 24px -8px rgba(30, 41, 59, 0.12);
+    0 8px 24px -8px rgba(30, 41, 59, 0.1);
   transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  min-width: 0;
 
   &:hover {
     transform: translateY(-2px);
     box-shadow:
       0 1px 2px rgba(15, 23, 42, 0.05),
-      0 14px 32px -10px rgba(30, 41, 59, 0.18);
+      0 14px 32px -10px rgba(30, 41, 59, 0.16);
   }
 }
 
@@ -95,10 +72,16 @@
 }
 
 /* ===================== Stat cards ===================== */
+// Exactly 5 KPI cards now (join/exit removed). `auto-fit` + `minmax`
+// lets the grid decide how many columns fit at the current width and
+// stretches whatever lands in the last row to fill it evenly — no
+// fixed column-count breakpoints or :last-child spans needed, so a
+// card can never wrap alone with dead space next to it.
 .dash__stats {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+  width: 100%;
 }
 
 .stat-card {
@@ -124,8 +107,25 @@
   100% { background-position: 0 50%; }
 }
 
+.stat-card__badge-corner {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  padding: 2px 8px;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #7c3aed;
+  background: rgba(124, 58, 237, 0.12);
+  border: 1px solid rgba(124, 58, 237, 0.22);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
 .stat-card__label {
   margin: 0;
+  padding-right: 56px; // clears the corner badge so the label never runs under it
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.05em;
@@ -138,10 +138,11 @@
 
 .stat-card__value {
   margin: 0;
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 800;
   color: #0f172a;
   letter-spacing: -0.01em;
+  white-space: nowrap; // safe now — badge no longer competes for this line's width
 }
 
 .stat-card__sublabel {
@@ -150,6 +151,17 @@
   color: #64748b;
   line-height: 1.4;
   min-height: 1.4em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stat-card__note {
+  margin: 0;
+  font-size: 10.5px;
+  font-style: italic;
+  color: #94a3b8;
+  line-height: 1.3;
 }
 
 /* ===================== Panel grids ===================== */
@@ -157,18 +169,16 @@
   display: grid;
   gap: 16px;
   align-items: start;
-}
-
-.dash__grid--donuts {
-  grid-template-columns: repeat(3, 1fr);
+  width: 100%;
 }
 
 .dash__grid--bars {
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .panel {
-  padding: 20px 22px 22px;
+  padding: 22px 24px 24px;
+  min-width: 0;
 }
 
 .panel__heading {
@@ -182,163 +192,225 @@
   color: #0f172a;
 }
 
-.panel__title--bars {
-  margin-bottom: 18px;
-}
-
 .panel__subtitle {
   margin: 3px 0 0;
   font-size: 12px;
   color: #64748b;
 }
 
-/* ---- Donut chart ---- */
-.donut-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px 0 18px;
+/* ===================== Summary breakdown card ===================== */
+.summary-card {
+  // just the shared .panel.glass — its own distinct card now
 }
 
-.donut {
-  position: relative;
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  box-shadow: 0 6px 20px -6px rgba(30, 41, 59, 0.25);
-}
-
-.donut__hole {
-  position: absolute;
-  inset: 30px;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(6px);
-  border-radius: 50%;
-}
-
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 14px;
-}
-
-.legend__item {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #475569;
-}
-
-.legend__swatch {
-  width: 11px;
-  height: 11px;
-  border-radius: 3px;
-  flex-shrink: 0;
-}
-
-/* ---- Horizontal bar charts ---- */
-.bar-chart {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.bar-row {
+.summary-tables {
   display: grid;
-  grid-template-columns: 190px 1fr;
-  align-items: center;
-  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 28px;
+  margin-top: 16px;
+  width: 100%;
 }
 
-.bar-row__label {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #334155;
-  text-transform: uppercase;
-  letter-spacing: 0.01em;
+.plain-table {
+  width: 100%;
+  min-width: 0;
+  border-collapse: collapse;
+}
+
+.plain-table tr {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.plain-table td {
+  padding: 12px 4px;
+  font-size: 13px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.bar-row__track {
-  position: relative;
-  height: 22px;
-  background: rgba(148, 163, 184, 0.18);
-  border-radius: 4px;
-  overflow: hidden;
+.plain-table__label {
+  width: 50%;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 11px;
 }
 
-.bar-row__fill {
-  height: 100%;
-  border-radius: 4px 0 0 4px;
-  transition: width 0.3s ease;
+.plain-table__value {
+  width: 50%;
+  font-weight: 700;
+  color: #0f172a;
+  text-align: right;
+  font-size: 13.5px;
 }
 
-.bar-axis {
-  display: grid;
-  grid-template-columns: 190px 1fr;
-  gap: 12px;
-  margin-top: 2px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(148, 163, 184, 0.25);
+.plain-table__empty {
+  margin: 16px 0 4px;
+  font-size: 13px;
+  color: #64748b;
+  text-align: center;
 }
 
-.bar-axis__spacer {
+/* ===================== Monthly trends card ===================== */
+.trends-card {
+  // just the shared .panel.glass — its own distinct card now
+}
+
+.chart-section__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.bu-dropdown {
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  background: #fff;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 10px;
+  cursor: pointer;
+  min-width: 220px;
+  max-width: 100%;
+
+  &:focus {
+    outline: none;
+    border-color: rgba(99, 102, 241, 0.5);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+  }
+}
+
+.chart-block {
   min-width: 0;
 }
 
-.bar-axis__ticks {
-  display: flex;
-  justify-content: space-between;
+.chart-block__title {
+  margin: 0 0 16px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #334155;
 }
 
-.bar-axis__tick {
+.vbar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: 220px;
+  padding-top: 8px;
+}
+
+.vbar {
+  position: relative; // anchors the hover tooltip
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  min-width: 0;
+}
+
+.vbar__tooltip {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 0);
+  padding: 5px 9px;
   font-size: 11px;
-  color: #94a3b8;
+  font-weight: 600;
   white-space: nowrap;
+  color: #fff;
+  background: #0f172a;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.3);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+  z-index: 5;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #0f172a;
+  }
+}
+
+.vbar:hover .vbar__tooltip {
+  opacity: 1;
+}
+
+.vbar:hover .vbar__fill {
+  filter: brightness(1.08);
+}
+
+.vbar__track {
+  position: relative;
+  width: 100%;
+  max-width: 26px;
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(148, 163, 184, 0.15);
+  border-radius: 4px 4px 0 0;
+}
+
+.vbar__fill {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  transition: height 0.3s ease, filter 0.15s ease;
+}
+
+.vbar-chart--ctc .vbar__fill {
+  background: linear-gradient(180deg, #818cf8, #6366f1);
+}
+
+.vbar-chart--manpower .vbar__fill {
+  background: linear-gradient(180deg, #fbbf24, #f5a623);
+}
+
+.vbar__label {
+  margin-top: 6px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
 }
 
 /* ============================= RESPONSIVE ============================= */
+// .dash__stats no longer needs column-count overrides here — the
+// auto-fit grid above reflows on its own at every width. These
+// breakpoints just cover the other panels plus card density/typography
+// on small screens.
 @media (max-width: 1200px) {
-  .dash__stats {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .dash__grid--donuts {
-    grid-template-columns: 1fr 1fr;
-  }
-
   .dash__grid--bars {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
 @media (max-width: 991.98px) {
-  .dash__stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .dash__grid--donuts {
-    grid-template-columns: 1fr;
-  }
-
-  .bar-row {
-    grid-template-columns: 140px 1fr;
-  }
-
-  .bar-axis {
-    grid-template-columns: 140px 1fr;
+  .summary-tables {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
   }
 }
 
 @media (max-width: 640px) {
   .dash__stats {
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
   }
 
   .stat-card {
@@ -346,42 +418,34 @@
   }
 
   .stat-card__value {
-    font-size: 20px;
+    font-size: 19px;
   }
 
   .panel {
     padding: 16px;
   }
 
-  .donut {
-    width: 170px;
+  .chart-section__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bu-dropdown {
+    width: 100%;
+  }
+
+  .vbar-chart {
     height: 170px;
-  }
-
-  .donut__hole {
-    inset: 26px;
-  }
-
-  .bar-row {
-    grid-template-columns: 1fr;
     gap: 6px;
   }
 
-  .bar-row__label {
-    white-space: normal;
-  }
-
-  .bar-axis {
-    grid-template-columns: 1fr;
-  }
-
-  .bar-axis__spacer {
-    display: none;
+  .vbar__label {
+    font-size: 9px;
   }
 }
 
 @media (max-width: 400px) {
   .dash__stats {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }

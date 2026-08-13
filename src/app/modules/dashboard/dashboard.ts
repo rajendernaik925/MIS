@@ -26,29 +26,26 @@ interface StatCard {
   value: string;
   valueColor: string;
   sublabel: string;
+  badge?: string;
+  note?: string;
 }
 
-interface GroupSegment {
+/** One label/value field rendered as a table row. */
+interface SummaryField {
   label: string;
+  value: string;
+}
+
+/** One bar in a vertical monthly-trend chart. */
+interface MonthlyPoint {
+  month: string;
   value: number;
-  color: string;
+  tooltipValue: string;
 }
 
-interface DonutConfig {
-  title: string;
-  subtitle: string;
-  segments: GroupSegment[];
-}
-
-interface BarRow {
-  label: string;
-  value: number;
-}
-
-interface BarChartConfig {
-  title: string;
-  color: string;
-  rows: BarRow[];
+interface BusinessUnitOption {
+  id: string;
+  name: string;
 }
 
 @Component({
@@ -109,17 +106,20 @@ export class Dashboard {
     });
   }
 
-  // ---- Group colors (shared across all donuts) ----
-  private readonly groupColors = {
-    hyderabad: '#6366f1',
-    mumbai: '#f5a623',
-    consultants: '#10b981',
-  };
-
   /**
    * Live KPI cards, built straight from the /dashboard/summary response.
    * Falls back to em-dashes while loading/on error so the layout never
    * jumps or shows stale numbers.
+   *
+   * The CTC card carries an "Approx" badge (rendered as a corner chip,
+   * not inline with the value, so the value always has full width to
+   * render without truncating) and a note underneath the exact rupee
+   * amount, since CTC/Month is an estimate that includes annualised
+   * components spread across the year.
+   *
+   * Exactly 5 cards — Manpower, Net Payable, Actual Gross, Deductions,
+   * CTC/Month. The dash__stats grid below is sized for 5 columns to
+   * match.
    */
   statCards = computed<StatCard[]>(() => {
     const s = this.summary();
@@ -165,6 +165,8 @@ export class Dashboard {
         value: this.formatCr(s.ctcPerMonth),
         valueColor: '#0ab86d',
         sublabel: `₹${this.formatIndian(s.ctcPerMonth)}`,
+        badge: 'Approx',
+        note: 'Including all annual components',
       },
     ];
   });
@@ -172,108 +174,105 @@ export class Dashboard {
   statsFootnote =
     "*Consultant/contractor rows don't split Gross vs Deductions in the source sheet — see Methodology. KPIs above recompute when you change the pay period or location filter in the top bar.";
 
-  // ---- Donut charts: Manpower / Net Payable / CTC by Group ----
-  // The /dashboard/summary endpoint returns one aggregate row for whatever
-  // filter is selected (e.g. group: "ALL"), not a per-group breakdown, so
-  // there's no live data source for a group-wise split yet. Kept as
-  // clearly-labelled sample data below until a breakdown endpoint exists —
-  // swap this block for real data the same way statCards was wired up.
-  donuts: DonutConfig[] = [
-    {
-      title: 'Manpower by Group',
-      subtitle: 'Hyderabad · Mumbai · Consultants (sample)',
-      segments: [
-        { label: 'Hyderabad', value: 1916, color: this.groupColors.hyderabad },
-        { label: 'Mumbai', value: 4331, color: this.groupColors.mumbai },
-        { label: 'Consultants', value: 65, color: this.groupColors.consultants },
-      ],
-    },
-    {
-      title: 'Net Payable by Group',
-      subtitle: '₹ this pay period (sample)',
-      segments: [
-        { label: 'Hyderabad', value: 9.85, color: this.groupColors.hyderabad },
-        { label: 'Mumbai', value: 21.9, color: this.groupColors.mumbai },
-        { label: 'Consultants', value: 0.87, color: this.groupColors.consultants },
-      ],
-    },
-    {
-      title: 'CTC / Month by Group',
-      subtitle: '₹ monthly cost-to-company (sample)',
-      segments: [
-        { label: 'Hyderabad', value: 9.6, color: this.groupColors.hyderabad },
-        { label: 'Mumbai', value: 21.4, color: this.groupColors.mumbai },
-        { label: 'Consultants', value: 0.92, color: this.groupColors.consultants },
-      ],
-    },
+  /**
+   * Full summary breakdown, split into two flat halves and rendered as
+   * two separate plain <table> elements side by side with a gap between
+   * them, both inside a single shared card. Built straight off the same
+   * `summary()` signal the KPI cards use — no extra HTTP call.
+   */
+  private summaryFields = computed<SummaryField[]>(() => {
+    const s = this.summary();
+    if (!s) {
+      return [];
+    }
+
+    return [
+      { label: 'FY Year', value: s.fyYear },
+      { label: 'Pay Period', value: String(s.payPeriod) },
+      { label: 'Business Unit', value: s.businessUnitName ?? 'All units' },
+      { label: 'Group', value: s.group },
+      { label: 'Manpower', value: this.formatIndian(s.manpower) },
+      { label: 'TEDA', value: `₹${this.formatIndian(s.teda)}` },
+      { label: 'Incentive', value: `₹${this.formatIndian(s.incentive)}` },
+      { label: 'Net Salary', value: `₹${this.formatIndian(s.netSalary)}` },
+      { label: 'Total Net Payable', value: `₹${this.formatIndian(s.totalNetPayable)}` },
+      { label: 'Total Actual Gross', value: `₹${this.formatIndian(s.totalActualGross)}` },
+      { label: 'Total Deductions', value: `₹${this.formatIndian(s.totalDeductions)}` },
+      { label: 'CTC / Month', value: `₹${this.formatIndian(s.ctcPerMonth)}` },
+    ];
+  });
+
+  summaryLeft = computed<SummaryField[]>(() => {
+    const half = Math.ceil(this.summaryFields().length / 2);
+    return this.summaryFields().slice(0, half);
+  });
+
+  summaryRight = computed<SummaryField[]>(() => {
+    const half = Math.ceil(this.summaryFields().length / 2);
+    return this.summaryFields().slice(half);
+  });
+
+  // ---- Business unit filter for the monthly trend charts ----
+  businessUnits: BusinessUnitOption[] = [
+    { id: 'all', name: 'All Business Units' },
+    { id: 'hhc-corporate', name: 'HHC - Corporate' },
+    { id: 'hhc-main', name: 'HHC - Main' },
+    { id: 'hhc-kris', name: 'HHC - Kris' },
+    { id: 'advanced-eng', name: 'Advanced Engineering Group' },
+    { id: 'azista-composites', name: 'Azista Composites' },
   ];
 
-  // ---- Top 8 units by Net Payable, per group ----
-  // Same caveat as the donuts above: sample data pending a unit-level
-  // breakdown endpoint.
-  barCharts: BarChartConfig[] = [
-    {
-      title: 'Top 8 Hyderabad Units by Net Payable (sample)',
-      color: this.groupColors.hyderabad,
-      rows: [
-        { label: 'HHC - CORPORATE', value: 11500000 },
-        { label: 'ADVANCED ENGINEERING GROUP', value: 10200000 },
-        { label: 'HHC UNIT-1 ASSAM', value: 9900000 },
-        { label: 'AZISTA COMPOSITES', value: 9700000 },
-        { label: 'HHC UNIT-2 ASSAM', value: 8000000 },
-        { label: 'AZISTA - AHMEDABAD - SATELLITE', value: 7500000 },
-        { label: 'HHC - SPECIALITY CARE', value: 6000000 },
-        { label: 'HHC UNIT-1 ASHYD', value: 5800000 },
-      ],
-    },
-    {
-      title: 'Top 8 Mumbai Units by Net Payable (sample)',
-      color: this.groupColors.mumbai,
-      rows: [
-        { label: 'HHC - MAIN', value: 34000000 },
-        { label: 'HHC - KRIS', value: 30500000 },
-        { label: 'HHC - GENX', value: 29000000 },
-        { label: 'HHC - FRENZA', value: 17000000 },
-        { label: 'HHC - ONCOLOGY', value: 13000000 },
-        { label: 'HHC - ASRA', value: 12000000 },
-        { label: 'BLISS', value: 11000000 },
-        { label: 'HHC - GASTRO', value: 10500000 },
-      ],
-    },
-  ];
+  selectedBusinessUnit = signal<string>('all');
 
-  /** Builds a CSS conic-gradient string from a donut's segments. */
-  donutGradient(donut: DonutConfig): string {
-    const total = donut.segments.reduce((sum, s) => sum + s.value, 0);
-    let cursor = 0;
-    const stops = donut.segments
-      .filter((s) => s.value > 0)
-      .map((s) => {
-        const start = (cursor / total) * 100;
-        cursor += s.value;
-        const end = (cursor / total) * 100;
-        return `${s.color} ${start}% ${end}%`;
-      });
-    return `conic-gradient(${stops.join(', ')})`;
+  onBusinessUnitChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    this.selectedBusinessUnit.set(value);
   }
 
-  /** Percentage share of a single segment within its donut, for optional display. */
-  segmentPercent(donut: DonutConfig, segment: GroupSegment): number {
-    const total = donut.segments.reduce((sum, s) => sum + s.value, 0);
-    return total ? Math.round((segment.value / total) * 100) : 0;
+  // ---- Monthly trend charts: CTC / Month and Manpower, Jan–Dec ----
+  // Sample data pending a real monthly-trend-by-business-unit endpoint.
+  // `monthlyFactor()` just scales the "All Business Units" baseline so
+  // picking a unit from the dropdown visibly changes the charts — replace
+  // this whole block with a live fetch keyed on selectedBusinessUnit()
+  // once that endpoint exists.
+  private readonly monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  private readonly ctcMonthlyBaseCr = [28.4, 29.1, 30.0, 29.6, 30.8, 31.2, 31.92, 32.1, 31.5, 30.9, 31.4, 32.0];
+  private readonly manpowerMonthlyBase = [5980, 6025, 6080, 6110, 6150, 6200, 6312, 6280, 6260, 6240, 6300, 6350];
+
+  private readonly businessUnitFactors: Record<string, number> = {
+    all: 1,
+    'hhc-corporate': 0.18,
+    'hhc-main': 0.32,
+    'hhc-kris': 0.22,
+    'advanced-eng': 0.15,
+    'azista-composites': 0.13,
+  };
+
+  private monthlyFactor(): number {
+    return this.businessUnitFactors[this.selectedBusinessUnit()] ?? 1;
   }
 
-  /** Width (%) of a bar relative to the largest value in its chart. */
-  barWidth(chart: BarChartConfig, row: BarRow): number {
-    const max = Math.max(...chart.rows.map((r) => r.value));
-    return max ? (row.value / max) * 100 : 0;
-  }
+  ctcMonthly = computed<MonthlyPoint[]>(() => {
+    const factor = this.monthlyFactor();
+    return this.monthLabels.map((month, i) => {
+      const value = +(this.ctcMonthlyBaseCr[i] * factor).toFixed(2);
+      return { month, value, tooltipValue: `₹${value} Cr (Approx)` };
+    });
+  });
 
-  /** Evenly spaced axis tick values (5 ticks incl. 0) for a bar chart, in Indian numbering. */
-  axisTicks(chart: BarChartConfig): string[] {
-    const max = Math.max(...chart.rows.map((r) => r.value));
-    const step = max / 4;
-    return Array.from({ length: 5 }, (_, i) => this.formatIndian(Math.round(step * i)));
+  manpowerMonthly = computed<MonthlyPoint[]>(() => {
+    const factor = this.monthlyFactor();
+    return this.monthLabels.map((month, i) => {
+      const value = Math.round(this.manpowerMonthlyBase[i] * factor);
+      return { month, value, tooltipValue: `${this.formatIndian(value)} (Approx)` };
+    });
+  });
+
+  /** Height (%) of a vertical bar relative to the largest value in its series. */
+  vbarHeight(points: MonthlyPoint[], point: MonthlyPoint): number {
+    const max = Math.max(...points.map((p) => p.value));
+    return max ? (point.value / max) * 100 : 0;
   }
 
   /** Formats a number using Indian digit grouping, e.g. 15000000 -> "1,50,00,000". */

@@ -3,7 +3,7 @@ import { inject, Injectable } from "@angular/core";
 import { catchError, from, Observable, switchMap, throwError } from "rxjs";
 import { Router } from "@angular/router";
 import { CoreService } from "../../core/services/core.services";
-import { joinAndExitUrls, payableUrls } from "../../../api.constants";
+import { joinAndExitUrls } from "../../../api.constants";
 
 @Injectable({
   providedIn: 'root'
@@ -65,5 +65,14 @@ export class joinAndExitService {
     return this.http.post<any>(`${joinAndExitUrls.joinAndExitList}`, formData).pipe(
       catchError(this.handleError),
     );
+  }
+
+  exportExcel(formData: FormData): Observable<HttpResponse<Blob>> {
+    return this.http
+      .post(`${joinAndExitUrls.exportExcel}`, formData, {
+        responseType: 'blob',
+        observe: 'response',
+      })
+      .pipe(catchError(this.handleError));
   }
 }

@@ -6,9 +6,11 @@
       class="stat-card glass"
       [class.stat-card--loading]="loading()"
       *ngFor="let card of statCards()">
+      <span class="stat-card__badge-corner" *ngIf="card.badge">{{ card.badge }}</span>
       <p class="stat-card__label">{{ card.label }}</p>
       <p class="stat-card__value" [style.color]="card.valueColor">{{ card.value }}</p>
       <p class="stat-card__sublabel">{{ card.sublabel }}</p>
+      <p class="stat-card__note" *ngIf="card.note">{{ card.note }}</p>
     </div>
   </div>
 
@@ -17,56 +19,89 @@
     Couldn't load the dashboard summary for this selection. Please try again.
   </div>
 
-  <p class="dash__footnote">{{ statsFootnote }}</p>
+  <!-- ===================== Summary breakdown card ===================== -->
+  <section class="panel glass summary-card">
+    <div class="panel__heading">
+      <h3 class="panel__title">Summary Breakdown</h3>
+      <p class="panel__subtitle">Full pay period detail for the current filter selection</p>
+    </div>
 
-  <!-- ===================== Donut charts by group ===================== -->
-  <div class="dash__grid dash__grid--donuts">
-    <section class="panel glass" *ngFor="let donut of donuts">
+    <div class="summary-tables" *ngIf="summaryLeft().length; else summaryEmpty">
+      <table class="plain-table">
+        <tbody>
+          <tr *ngFor="let field of summaryLeft()">
+            <td class="plain-table__label">{{ field.label }}</td>
+            <td class="plain-table__value">{{ field.value }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <table class="plain-table">
+        <tbody>
+          <tr *ngFor="let field of summaryRight()">
+            <td class="plain-table__label">{{ field.label }}</td>
+            <td class="plain-table__value">{{ field.value }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #summaryEmpty>
+      <p class="plain-table__empty">{{ loading() ? 'Loading summary…' : 'No data for this selection.' }}</p>
+    </ng-template>
+  </section>
+
+  <!-- ===================== Monthly trends card ===================== -->
+  <section class="panel glass trends-card">
+    <div class="chart-section__header">
       <div class="panel__heading">
-        <h3 class="panel__title">{{ donut.title }}</h3>
-        <p class="panel__subtitle">{{ donut.subtitle }}</p>
+        <h3 class="panel__title">Monthly Trends</h3>
+        <p class="panel__subtitle">CTC / Month and Manpower, Jan – Dec (sample, approx)</p>
       </div>
 
-      <div class="donut-wrap">
-        <div class="donut" [style.background]="donutGradient(donut)">
-          <div class="donut__hole"></div>
-        </div>
-      </div>
+      <select class="bu-dropdown" (change)="onBusinessUnitChange($event)">
+        <option
+          *ngFor="let bu of businessUnits"
+          [value]="bu.id"
+          [selected]="bu.id === selectedBusinessUnit()">
+          {{ bu.name }}
+        </option>
+      </select>
+    </div>
 
-      <div class="legend">
-        <span class="legend__item" *ngFor="let seg of donut.segments">
-          <span class="legend__swatch" [style.background]="seg.color"></span>
-          {{ seg.label }}
-        </span>
-      </div>
-    </section>
-  </div>
+    <div class="dash__grid dash__grid--bars">
+      <div class="chart-block">
+        <h4 class="chart-block__title">Total CTC / Month</h4>
 
-  <!-- ===================== Top units by Net Payable ===================== -->
-  <div class="dash__grid dash__grid--bars">
-    <section class="panel glass" *ngFor="let chart of barCharts">
-      <h3 class="panel__title panel__title--bars">{{ chart.title }}</h3>
-
-      <div class="bar-chart">
-        <div class="bar-row" *ngFor="let row of chart.rows">
-          <span class="bar-row__label">{{ row.label }}</span>
-          <div class="bar-row__track">
-            <div
-              class="bar-row__fill"
-              [style.width.%]="barWidth(chart, row)"
-              [style.background]="chart.color"
-            ></div>
-          </div>
-        </div>
-
-        <div class="bar-axis">
-          <span class="bar-axis__spacer"></span>
-          <div class="bar-axis__ticks">
-            <span class="bar-axis__tick" *ngFor="let tick of axisTicks(chart)">{{ tick }}</span>
+        <div class="vbar-chart vbar-chart--ctc">
+          <div class="vbar" *ngFor="let point of ctcMonthly()">
+            <div class="vbar__tooltip" [style.bottom.%]="vbarHeight(ctcMonthly(), point) + 4">
+              {{ point.month }}: {{ point.tooltipValue }}
+            </div>
+            <div class="vbar__track">
+              <div class="vbar__fill" [style.height.%]="vbarHeight(ctcMonthly(), point)"></div>
+            </div>
+            <span class="vbar__label">{{ point.month }}</span>
           </div>
         </div>
       </div>
-    </section>
-  </div>
+
+      <div class="chart-block">
+        <h4 class="chart-block__title">Manpower</h4>
+
+        <div class="vbar-chart vbar-chart--manpower">
+          <div class="vbar" *ngFor="let point of manpowerMonthly()">
+            <div class="vbar__tooltip" [style.bottom.%]="vbarHeight(manpowerMonthly(), point) + 4">
+              {{ point.month }}: {{ point.tooltipValue }}
+            </div>
+            <div class="vbar__track">
+              <div class="vbar__fill" [style.height.%]="vbarHeight(manpowerMonthly(), point)"></div>
+            </div>
+            <span class="vbar__label">{{ point.month }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
 </div>

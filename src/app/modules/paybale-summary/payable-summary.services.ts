@@ -66,18 +66,6 @@ export class payableService {
       catchError(this.handleError),
     );
   }
-
-  /**
-   * Excel export — the backend streams back the raw .xlsx binary, so this
-   * MUST be requested with responseType: 'blob'. Without it, HttpClient
-   * defaults to responseType: 'json', which tries to UTF-8/JSON-decode the
-   * binary bytes and corrupts the file (that's the garbled "PK...ZoS..."
-   * text you see if you log the response directly).
-   *
-   * observe: 'response' is used (rather than just the body) so the caller
-   * can read the filename the backend suggests via the
-   * Content-Disposition header, instead of hardcoding one.
-   */
   exportExcel(formData: FormData): Observable<HttpResponse<Blob>> {
     return this.http
       .post(`${payableUrls.exportExcel}`, formData, {
@@ -85,5 +73,11 @@ export class payableService {
         observe: 'response',
       })
       .pipe(catchError(this.handleError));
+  }
+
+  summary(formData: FormData): Observable<any> {
+    return this.http.post<any>(`${payableUrls.summary}`, formData).pipe(
+      catchError(this.handleError),
+    );
   }
 }

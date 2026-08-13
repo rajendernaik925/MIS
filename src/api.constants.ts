@@ -21,8 +21,10 @@ export const dashboardUrls = {
 export const payableUrls = {
   paybleList: `${constantPayableUrl}/fetch-summary`,
   exportExcel: `${constantPayableUrl}/export-excel`,
+  summary: `${constantDashboardUrl}/summary`,
 };
 
 export const joinAndExitUrls = {
   joinAndExitList: `${constantjoinAndExitUrl}/fetch-summary`,
+  exportExcel: `${constantjoinAndExitUrl}/export-excel`,
 }
