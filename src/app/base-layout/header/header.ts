@@ -14,7 +14,7 @@ export class Header implements OnInit {
   protected readonly filterState = inject(FilterStateService);
   private readonly elRef = inject(ElementRef<HTMLElement>);
 
-  @Input() pageTitle = 'Executive Overview';
+  @Input() pageTitle = 'Smart MIS';
   @Output() menuToggle = new EventEmitter<void>();
 
   readonly payPeriodOpen = signal(false);

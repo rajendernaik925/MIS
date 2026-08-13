@@ -2,6 +2,7 @@ $blue: #5646e0;
 $blue-dark: #392c93;
 $blue-head: #4636bd;
 $green: #16a34a;
+$green-dark: #128a3e;
 $red: #dc2626;
 $border-light: #e5e7eb;
 $text-dark: #1f2430;
@@ -91,6 +92,36 @@ $row-stripe: #fafafa;
   align-items: center;
   gap: 0.6rem;
   flex-shrink: 0;
+}
+
+.download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: $green;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  height: 32px;
+  padding: 0 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s ease, opacity 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: $green-dark;
+  }
+
+  &:disabled,
+  &[aria-disabled='true'] {
+    background: rgba(255, 255, 255, 0.35);
+    color: rgba(255, 255, 255, 0.75);
+    cursor: not-allowed;
+    opacity: 0.8;
+  }
 }
 
 .search-box {
@@ -323,5 +354,36 @@ thead th.sticky-col {
 
   &:hover {
     background: $blue;
+  }
+}
+.summary-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 7px;
+  height: 32px;
+  padding: 0 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.24);
+    border-color: rgba(255, 255, 255, 0.6);
+  }
+
+  &:disabled,
+  &[aria-disabled='true'] {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.6);
+    cursor: not-allowed;
+    opacity: 0.8;
   }
 }

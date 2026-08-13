@@ -1,10 +1,11 @@
-import { Component, DestroyRef, effect, inject, signal, computed } from '@angular/core';
+import { Component, DestroyRef, effect, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FilterStateService } from '../../../base-layout/core/filter-state.service';
 import { joinAndExitService } from '../join.services';
+import { Router } from '@angular/router';
 
 /** Shape of a single row exactly as the API returns it. */
 interface ApiJoinExitRow {
@@ -53,10 +54,11 @@ type SortKey = keyof JoinExitRow;
   templateUrl: './join-list.html',
   styleUrl: './join-list.scss',
 })
-export class JoinList {
+export class JoinList implements OnInit {
   private filterState = inject(FilterStateService);
   private joinAndExitService = inject(joinAndExitService);
   private destroyRef = inject(DestroyRef);
+  private route: Router = inject(Router);
 
   // ---- Reactive state ----
   currentFilters = signal<ActiveFilters>({ payPeriod: '', location: 'HYD' });
@@ -109,6 +111,7 @@ export class JoinList {
       });
   }
 
+  ngOnInit(): void {}
 
   onSearchInput(value: string): void {
     this.searchInput$.next(value.trim());
@@ -225,15 +228,52 @@ export class JoinList {
     return value.toLocaleString('en-IN');
   }
 
-  downloadExcel() {
+  downloadingExcel = signal(false);
+
+  downloadExcel(): void {
+    if (!this.hasData() || this.downloadingExcel()) {
+      return;
+    }
+
     const formData = new FormData();
     formData.append('payPeriod', this.currentFilters().payPeriod);
     formData.append('type', this.currentFilters().location);
-    this.joinAndExitService.exportExcel(formData).subscribe({
-      next: (res: any) => {
-        console.log(res)
-      }
-    })
 
+    this.downloadingExcel.set(true);
+
+    this.joinAndExitService.exportExcel(formData).subscribe({
+      next: (res) => {
+        const blob = res.body;
+        if (!blob) {
+          this.downloadingExcel.set(false);
+          return;
+        }
+
+        // Prefer the filename the backend suggests via Content-Disposition,
+        // e.g. `attachment; filename="Join_Exit_202607.xlsx"`.
+        const disposition = res.headers.get('content-disposition') ?? '';
+        const match = /filename\*?=(?:UTF-8'')?"?([^";]+)"?/i.exec(disposition);
+        const filename = match?.[1] ?? `join-exit-${this.currentFilters().payPeriod}.xlsx`;
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        this.downloadingExcel.set(false);
+      },
+      error: (err) => {
+        console.error('Export Excel Error:', err);
+        this.downloadingExcel.set(false);
+      },
+    });
+  }
+
+  graphUI() {
+    this.route.navigate(['joins-exits/graph']);
   }
 }

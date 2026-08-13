@@ -6,7 +6,7 @@ export const Routes: Route[] = [
         loadComponent: () => import('./list/list').then(c => c.List)
     },
     {
-        path: 'individual-summary',
+        path: 'summary',
         loadComponent: () => import('./manage/manage').then(c => c.Manage)
     },
     {

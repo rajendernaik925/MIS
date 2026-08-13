@@ -319,6 +319,6 @@ export class List {
       return;
     }
 
-    this.route.navigate(['payable/individual-summary']);
+    this.route.navigate(['payable/summary']);
   }
 }

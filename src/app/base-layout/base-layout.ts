@@ -16,7 +16,7 @@ export class BaseLayout {
   // TODO: drive this from route data (e.g. this.router.events + a
   // `data: { title: '...' }` on each route) if every page needs its own
   // title without hardcoding it here.
-  pageTitle = 'Executive Overview';
+  pageTitle = ' SMART MIS';
 
   /** Desktop: icon-only collapsed rail. */
   sidebarCollapsed = false;
